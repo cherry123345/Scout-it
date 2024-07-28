@@ -27,7 +27,7 @@ body{
   font-family: "Kode Mono", monospace;
   position: fixed;
   z-index: 10;
-  color: #fff;
+  color: #002e6a;
 }
 
 .addBtn:hover{
