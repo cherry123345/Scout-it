@@ -1,0 +1,113 @@
+
+/* Modal styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  margin-top: auto;
+  padding-top:  3%;
+}
+
+.modal.show {
+  display: flex; /* Center content using flexbox */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+}
+  
+  /* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin:  auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  max-width: 500px; /* Limit the maximum width */
+  border-radius: 10px; /* Rounded corners */
+  overflow: auto;
+}
+
+.modal-content p{
+  padding-bottom: 10px;
+}
+
+/* Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.delete-button {
+  background-color: rgb(205, 18, 18);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: rgb(255, 0, 0);
+}
+
+.edit-button{
+  background-color: rgb(20, 138, 24);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button:hover{
+  background-color: rgb(53, 186, 13);
+}
+
+.save-button{
+  background-color: rgb(20, 138, 24);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.save-button:hover{
+  background-color: rgb(53, 186, 13);
+}
+
+
+.modal-btn{
+  padding-top: 10px;
+}
+
+.update-form{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.update-form select {
+  width: 100%;
+  height: auto; /* Adjust height as needed */
+  overflow-y: scroll;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}

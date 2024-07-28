@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="/css/add-robot-modal.css">
+<div id="addRobotModal" class="addmodal">
+    <div class="add-modal-content">
+        <span id="closeModalBtn" class="add-modal-close-btn">&times;</span>
+        <h2>Add New Robot</h2>
+        <form id="addRobotForm" action="/add-robot" method="POST" enctype="multipart/form-data">
+
+            <label for="teamNum">Team Number:</label>
+            <input type="text" id="teamNum" name="teamNum" required>
+
+            <label for="teamName">Team Name:</label>
+            <input type="text" id="teamName" name="teamName">
+
+            <label for="robotName">Robot Name:</label>
+            <input type="text" id="robotName" name="robotName">
+
+            <label for="robotImage">Upload or Take a Picture:</label>
+            <input type="file" id="robotImage" name="robotImage" accept="image/*" capture>
+
+            <button type="submit" class="add-btn btn-primary">Add Robot</button>
+        </form>
+    </div>
+</div>
+
+            <!-- <label for="robotDrivetrain">Select Drivetrain:</label>
+            <select id="robotDrivetrain" name="robotDrivetrain" required>
+                <option value="" disabled selected>Select a drivetrain</option>
+                <option value="swerve">Swerve</option>
+                <option value="tank">Tank</option>
+            </select> -->

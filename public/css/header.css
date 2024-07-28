@@ -1,0 +1,106 @@
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: calc(100% - 20px); /* Adjust the width to account for the margin */
+    max-width: 100vw; /* Prevent horizontal overflow */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #002e6a; /* Change to your desired background color */
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: add a shadow for better visibility */
+    z-index: 1000; /* Ensure it stays on top of other content */
+    margin: 0 10px; /* Margin on left and right */
+    margin-top: 10px;
+    border-radius: 60px;
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+}
+
+.header_logo {
+    display: flex;
+    align-items: center;
+    padding-left: 30px;
+}
+
+.header_logo img {
+    height: 80px; /* Adjust logo size as needed */
+    width: 80px;
+}
+
+.header_nav {
+    display: flex;
+    align-items: center;
+}
+
+.header_nav ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    padding-right: 60px;
+}
+
+.header_nav li {
+    margin-left: 50px; /* Adjust spacing between items as needed */
+}
+
+.header_nav a {
+    text-decoration: none;
+    color: #ffffff; /* Change to your desired text color */
+    font-weight: bold; /* Optional: make the text bold */
+    font-size: x-large;
+    font-family: "Chakra Petch", sans-serif;
+}
+
+.header_nav a:hover {
+    color: #dd7a10; /* Change to your desired hover color */
+}
+
+/* Burger Menu Styles */
+.burger-menu {
+    display: none;/* Hide burger menu by default */
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: #ffffff; /* Change color to match your design */
+    cursor: pointer;
+    margin-right: 30px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .header_nav {
+        flex-direction: column;
+        position: absolute;
+        top: 60px; /* Adjust based on header height */
+        right: 10px;
+        background-color: #002e6a;
+        border-radius: 20px;
+        display: none; /* Hide the nav links initially */
+    }
+
+    .header_nav.active {
+        display: flex; /* Show nav links when burger menu is clicked */
+    }
+
+    .burger-menu {
+        display: block; /* Show burger menu on small screens */
+    }
+
+    .header_nav ul {
+        padding-top: 50px;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .header_nav li {
+        margin-left: 50px;
+        margin-bottom: 10px; /* Spacing between items */
+        text-align: center;
+    }
+
+    .header_nav a {
+        font-size: large; /* Adjust font size for better fit on small screens */
+    }
+}

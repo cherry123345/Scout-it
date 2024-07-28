@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="/css/robot-card.css">  
+
+<button id="openModalBtn" class="addBtn">ADD ROBOT+</button>
+<!-- Error Message -->
+<% if (messages && messages.error && messages.error.length > 0) { %>
+    <% messages.error.forEach(function(message) { %>
+        <div class="alert alert-danger">
+            <%= message %>
+        </div>
+    <% }); %>
+<% } %>
+
+<section class="robots">
+    <ul class="robots-ul">
+        <% data.forEach(bot => { %>
+            <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" 
+                data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" 
+                data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>"
+                data-climbandtrap="<%= bot.ClimbAndTrap %>" data-featuresAndLimitations="<%= bot.SpecialfeaturesAndLimitations %>">
+
+                <% if (bot.RobotImage && bot.RobotImage.length > 0) { %>
+                    <img src="data:image/png;base64,<%= bot.RobotImage.toString('base64') %>" alt="Robot Image">
+                <% } else { %>
+                    <img  src="/img/robot-placeholder.png" alt="Placeholder Image">
+                <% } %>
+                <div class="team-number"><%= bot.TeamNum %></div>
+                <div class="team-name"><%= bot.TeamName %></div>
+            </li>
+        <% }) %>
+    </ul>
+</section>
+
+<!-- Modal -->
+
+
+<%- include('partials/card-modal.ejs') %>

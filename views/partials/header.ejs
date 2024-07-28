@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="/css/header.css">
+<header class="header">
+    <a href="/" class="header_logo"><img src="../img/ScoutIt-logo.png" width="50" height="50" alt="Logo"></a>
+
+    <button class="burger-menu" aria-label="Toggle navigation">
+        &#9776;
+    </button>
+    <nav class="header_nav">
+        
+        <ul>
+            <li><a href="/" class="">HOME</a></li>
+            <li><a href="/about" class="">ABOUT</a></li>
+        </ul>
+    </nav>
+</header>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const burgerMenu = document.querySelector('.burger-menu');
+    const nav = document.querySelector('.header_nav');
+
+    burgerMenu.addEventListener('click', function() {
+        console.log('Burger menu clicked');
+        nav.classList.toggle('active');
+        console.log('Nav classes:', nav.className);
+    });
+});
+</script>

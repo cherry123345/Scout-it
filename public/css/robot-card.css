@@ -1,0 +1,110 @@
+.robots-ul {
+    list-style-type: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center the cards horizontally */
+    padding-top: 70px;
+}
+
+.robot-card {
+    position: relative;
+    width: calc(20% - 20px); /* 20% width minus margin for 5 cards per row */
+    margin: 10px;
+    border: 1px solid #ddd;
+    background-color: rgba(255, 255, 255, 0.96);
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
+    box-shadow: 0 4px 16px rgba(90, 118, 212, 0.841); /* Add box shadow */
+    transition: box-shadow 0.3s ease; /* Smooth transition for shadow effect */
+    border-radius: 20px;
+}
+
+.robot-card img {
+    width: 250px;
+    height: 250px;
+    margin-top: 10px;
+    border-radius: 20px;
+
+    transition: opacity 0.3s ease; /* Smooth transition for image opacity */
+}
+
+.robot-card:hover {
+    box-shadow: 0 8px 20px rgb(255, 186, 58); /* Increase shadow on hover */
+    background-color: rgba(255, 153, 0, 0.774); /* Lighten the background */
+}
+
+.robot-card:hover img {
+    opacity: 0.7; /* Lighten the image on hover */
+    box-shadow: 0 0 16px rgb(255, 255, 255);
+}
+
+.team-number {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #002e6a;
+    font-family: "Chakra Petch", sans-serif;
+    font-size: larger;
+}
+
+.team-name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(255, 153, 0);
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    opacity: 0;
+    pointer-events: none; /* Prevent interaction when not visible */
+    transition: opacity 0.3s ease; /* Smooth transition for team name opacity */
+    z-index: 10; /* Ensure it's on top of other content */
+    font-family: "Chakra Petch", sans-serif;
+    font-size: large;
+    font-weight: 700;
+    box-shadow: 0 0 16px rgb(255, 255, 255);
+}
+
+.robot-card:hover .team-name {
+    opacity: 1; /* Show the team name on hover */
+    pointer-events: auto; /* Enable interaction when visible */
+}
+
+.robot-card:hover .team-number {
+color: #ffffff;
+}
+
+
+/* 4 cards per row */
+@media (max-width: 1200px) {
+    .robot-card {
+        width: calc(25% - 20px); /* 25% width minus margin for 4 cards per row */
+    }
+}
+
+/* 3 cards per row */
+@media (max-width: 992px) {
+    .robot-card {
+        width: calc(33.33% - 20px); /* 33.33% width minus margin for 3 cards per row */
+    }
+}
+
+/* 2 cards per row */
+@media (max-width: 768px) {
+    .robot-card {
+        width: calc(50% - 20px); /* 50% width minus margin for 2 cards per row */
+    }
+}
+
+/* 1 card per row */
+@media (max-width: 576px) {
+    .robot-card {
+        padding-top: 30px;
+        width: 70%; /* Full width */
+        margin: 5px; /* Reduced margin */ /* 100% width minus margin for 1 card per row */
+    }
+
+}
+

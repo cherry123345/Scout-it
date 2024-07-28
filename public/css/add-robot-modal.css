@@ -1,0 +1,62 @@
+
+/* Modal styles */
+
+.addmodal{
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+  
+.addmodal.show {
+    display: flex; /* Center content using flexbox */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+    
+    /* Modal Content */
+.add-modal-content {
+    background-color: #fefefe;
+    margin:  auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 500px; /* Limit the maximum width */
+    border-radius: 10px; /* Rounded corners */
+    overflow: auto;
+}
+  
+/* Close Button */
+.add-modal-close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.add-modal-close-btn:hover,
+.add-modal-close-btn:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+button[type="submit"] {
+    background-color: rgb(20, 138, 24); /* Green color for the submit button */
+    border: none;
+    padding: 10px;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+    
+button[type="submit"]:hover {
+    background-color: rgb(53, 186, 13); /* Darker green on hover */
+}
+    
