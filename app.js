@@ -7,13 +7,10 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const flash = require('connect-flash');
 
-
-
-
 dbconnection();
 
 const app = express();// allowing the app to rin the express function
-const PORT = 5000 || process.env.PORT;// PORTS t
+const PORT = 3000 || process.env.PORT;// PORTS t
 
 
 app.use(session({
