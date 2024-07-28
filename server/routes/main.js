@@ -105,7 +105,7 @@ router.get('/about', async (req, res) => {
     };
 
     try{
-        res.render('layouts/about', {locals, messages});
+        res.render('about', {locals, messages});
     } catch (error) {
         console.log(error);
         res.status(500).send('Internal Server Error'); 
