@@ -10,7 +10,7 @@ const flash = require('connect-flash');
 dbconnection();
 
 const app = express();// allowing the app to rin the express function
-const PORT = 3000 || process.env.PORT;// PORTS t
+const PORT = process.env.PORT || 3000 ;// PORTS t
 
 
 app.use(session({
