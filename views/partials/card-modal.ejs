@@ -4,8 +4,8 @@
 <div id="robotModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2 id="modalTeam"></h2>
-        <p id="modalRobotName"></p>
+        <h2 class="card-title" id="modalTeam"></h2>
+        <p class="card-title" id="modalRobotName"></p>
         <div class="update-form">
             <label for="modalWeight">Weight:</label>
             <input type="number" id="modalWeight" readonly placeholder="">
@@ -44,6 +44,7 @@
                 <button id="saveButton" class="save-button" style="display:none;">Save</button>
                 <button id="deleteButton" class="delete-button">Delete</button>
             </div>    
+            <p id="lastUpdated" class="last-updated"></p>
         </div>
     </div>
 </div>
@@ -51,144 +52,154 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('robotModal');
-    const span = document.getElementsByClassName('close')[0];
-    const deleteButton = document.getElementById('deleteButton');
-    const editButton = document.getElementById('editButton');
-    const saveButton = document.getElementById('saveButton');
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('robotModal');
+        const span = document.getElementsByClassName('close')[0];
+        const deleteButton = document.getElementById('deleteButton');
+        const editButton = document.getElementById('editButton');
+        const saveButton = document.getElementById('saveButton');
 
-    const inputFields = {
-        Weight: document.getElementById('modalWeight'),
-        FrameSize: document.getElementById('modalFrameSize'),
-        Drivetrain: document.getElementById('modalDrivetrain'),
-        ScorePlace: document.getElementById('modalScorePlace'),
-        AdjustableShooter: document.getElementById('modalAdjustableShooter'),
-        ClimbAndTrap: document.getElementById('modalClimbAndTrap'),
-        SpecialfeaturesAndLimitations: document.getElementById('modalSpecialfeaturesAndLimitations')
-    };
+        const inputFields = {
+            Weight: document.getElementById('modalWeight'),
+            FrameSize: document.getElementById('modalFrameSize'),
+            Drivetrain: document.getElementById('modalDrivetrain'),
+            ScorePlace: document.getElementById('modalScorePlace'),
+            AdjustableShooter: document.getElementById('modalAdjustableShooter'),
+            ClimbAndTrap: document.getElementById('modalClimbAndTrap'),
+            SpecialfeaturesAndLimitations: document.getElementById('modalSpecialfeaturesAndLimitations')
+        };
 
 
-    document.querySelectorAll('.robot-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const teamNum = card.getAttribute('data-teamnum');
-            const teamName = card.getAttribute('data-teamname');
-            const robotName = card.getAttribute('data-robotname');
-            const weight = card.getAttribute('data-weight');
-            const framesize = card.getAttribute('data-framesize');
-            const drivetrain = card.getAttribute('data-drivetrain');
-            const scoreplace = card.getAttribute('data-scoreplace');
-            const adjustabeshooter = card.getAttribute('data-adjustabeshooter');
-            const climbandtrap = card.getAttribute('data-climbandtrap');
-            const featuresAndLimitations = card.getAttribute('data-featuresAndLimitations');
+        document.querySelectorAll('.robot-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const teamNum = card.getAttribute('data-teamnum');
+                const teamName = card.getAttribute('data-teamname');
+                const robotName = card.getAttribute('data-robotname');
+                const weight = card.getAttribute('data-weight');
+                const framesize = card.getAttribute('data-framesize');
+                const drivetrain = card.getAttribute('data-drivetrain');
+                const scoreplace = card.getAttribute('data-scoreplace');
+                const adjustabeshooter = card.getAttribute('data-adjustabeshooter');
+                const climbandtrap = card.getAttribute('data-climbandtrap');
+                const featuresAndLimitations = card.getAttribute('data-featuresAndLimitations');
+                const lastUpdated = card.getAttribute('data-lastUpdated');
 
-            document.getElementById('modalTeam').textContent = `${teamNum}: ${teamName}`;
-            document.getElementById('modalRobotName').textContent = `Robot Name: ${robotName}`;
+                document.getElementById('modalTeam').textContent = `${teamNum}: ${teamName}`;
+                document.getElementById('modalRobotName').textContent = `Robot Name: ${robotName}`;
 
-            document.getElementById('modalWeight').placeholder = `${weight}`;
-            document.getElementById('modalFrameSize').placeholder = `${framesize}`;
-            document.getElementById('drivetrain-placeholder').textContent = `${drivetrain}`;
-            document.getElementById('scoreplace-placeholder').textContent = `${scoreplace}`;
-            document.getElementById('adjustabeshooter-placeholder').textContent = `${adjustabeshooter}`;
-            document.getElementById('climbandtrap-placeholder').textContent = `${climbandtrap}`;
-            document.getElementById('modalSpecialfeaturesAndLimitations').placeholder = `${featuresAndLimitations}`;
+                document.getElementById('modalWeight').placeholder = `${weight}`;
+                document.getElementById('modalFrameSize').placeholder = `${framesize}`;
+                document.getElementById('drivetrain-placeholder').textContent = `${drivetrain}`;
+                document.getElementById('scoreplace-placeholder').textContent = `${scoreplace}`;
+                document.getElementById('adjustabeshooter-placeholder').textContent = `${adjustabeshooter}`;
+                document.getElementById('climbandtrap-placeholder').textContent = `${climbandtrap}`;
+                document.getElementById('modalSpecialfeaturesAndLimitations').placeholder = `${featuresAndLimitations}`;
+                
+                const lastUpdatedDate = lastUpdated ? new Date(lastUpdated) : null;
+                const formattedDate = lastUpdatedDate ? lastUpdatedDate.toLocaleDateString() : 'N/A';
+                const formattedTime = lastUpdatedDate ? lastUpdatedDate.toLocaleTimeString() : 'N/A';
+                document.getElementById('lastUpdated').textContent = `Last Updated: ${formattedDate} ${formattedTime}`;
 
-            Object.keys(inputFields).forEach(key => {
-                const field = inputFields[key];
-                if (field.tagName === 'SELECT') {
-                    field.value = card.getAttribute(`data-${key.toLowerCase()}`) || ""; // Set dropdown value
-                } else {
-                    field.value = card.getAttribute(`data-${key.toLowerCase()}`) || ""; // Set input field value
-                }
-                field.readOnly = true; 
-                field.disabled = true
+
+                Object.keys(inputFields).forEach(key => {
+                    const field = inputFields[key];
+                    if (field.tagName === 'SELECT') {
+                        field.value = card.getAttribute(`data-${key.toLowerCase()}`) || ""; // Set dropdown value
+                    } else {
+                        field.value = card.getAttribute(`data-${key.toLowerCase()}`) || ""; // Set input field value
+                    }
+                    field.readOnly = true; 
+                    field.disabled = true
+                });
+
+                saveButton.setAttribute('data-team-num', teamNum);
+                deleteButton.setAttribute('data-team-num', teamNum);
+                modal.style.display = 'block';
+                saveButton.style.display = 'none';
+                editButton.style.display = 'inline-block';
             });
-
-            saveButton.setAttribute('data-team-num', teamNum);
-            deleteButton.setAttribute('data-team-num', teamNum);
-            modal.style.display = 'block';
-            saveButton.style.display = 'none';
-            editButton.style.display = 'inline-block';
         });
-    });
 
-    span.onclick = () => {
-        modal.style.display = 'none';
-    }
-
-    window.onclick = (event) => {
-        if (event.target == modal) {
+        span.onclick = () => {
             modal.style.display = 'none';
         }
-    }
 
-    editButton.addEventListener('click', () => {
-        Object.keys(inputFields).forEach(key => {
-            inputFields[key].disabled = false; // Make fields editable
-            inputFields[key].readOnly = false;
-        });
-        editButton.style.display = 'none';
-        saveButton.style.display = 'inline-block';
-    });
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
 
-    
-    saveButton.addEventListener('click', async () => {
-            const teamNum = saveButton.getAttribute('data-team-num');
-            const updatedData = {};
-
+        editButton.addEventListener('click', () => {
             Object.keys(inputFields).forEach(key => {
-                updatedData[key] = inputFields[key].value;
+                inputFields[key].disabled = false; // Make fields editable
+                inputFields[key].readOnly = false;
+            });
+            editButton.style.display = 'none';
+            saveButton.style.display = 'inline-block';
+        });
+
+        
+        saveButton.addEventListener('click', async () => {
+                const teamNum = saveButton.getAttribute('data-team-num');
+                const updatedData = {};
+
+                Object.keys(inputFields).forEach(key => {
+                    updatedData[key] = inputFields[key].value;
+                });
+
+                try {
+                    const response = await fetch(`/update/${teamNum}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    if (response.ok) {
+                        alert('Robot updated successfully');
+                        modal.style.display = 'none';
+                        location.reload(); // Refresh the page
+                    } else {
+                        const data = await response.json();
+                        alert(data.message || 'Failed to update robot');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the robot');
+                }
             });
 
+        deleteButton.addEventListener('click', async () => {
+            const teamNum = deleteButton.getAttribute('data-team-num');
+
+            const confirmation = confirm('Do you really want to delete this robot?');
+
+            if (!confirmation) {
+                return; // Exit the function if the user cancels the confirmation
+            }
+
             try {
-                const response = await fetch(`/update/${teamNum}`, {
-                    method: 'PUT',
+                const response = await fetch(`/delete/${teamNum}`, {
+                    method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData)
+                    }
                 });
 
                 if (response.ok) {
-                    alert('Robot updated successfully');
+                    alert('Robot deleted successfully');
                     modal.style.display = 'none';
                     location.reload(); // Refresh the page
                 } else {
                     const data = await response.json();
-                    alert(data.message || 'Failed to update robot');
+                    alert(data.message || 'Failed to delete robot');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while updating the robot');
+                alert('An error occurred while deleting the robot');
             }
         });
-
-    deleteButton.addEventListener('click', async () => {
-        const teamNum = deleteButton.getAttribute('data-team-num');
-
-        try {
-            const response = await fetch(`/delete/${teamNum}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                alert('Robot deleted successfully');
-                modal.style.display = 'none';
-                location.reload(); // Refresh the page
-            } else {
-                const data = await response.json();
-                alert(data.message || 'Failed to delete robot');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the robot');
-        }
     });
-});
-
-
-
 </script>

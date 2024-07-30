@@ -50,10 +50,26 @@ const RobotSchema = new mongoose.Schema({
 
     SpecialfeaturesAndLimitations: {
         type: String
+    },
+
+    lastUpdated: {
+        type: Date,
+        default: Date.now,
     }
 
-    }); 
+}); 
 
+// Middleware to update `lastUpdated` field before each save
+RobotSchema.pre('save', function(next) {
+    this.lastUpdated = Date.now();
+    next();
+});
+
+RobotSchema.pre('findOneAndUpdate', function(next) {
+    this.set({ lastUpdated: Date.now() });
+    next();
+  });
+  
 
 const Robot = mongoose.model('Robot', RobotSchema ) 
 module.exports = Robot 

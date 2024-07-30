@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Robot = require('../models/robot');
 const multer = require('multer');
-
+const createMatchCollection = require('../models/robot-matches');
+const mongoose = require('mongoose')
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -46,6 +47,15 @@ router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
 
     try {
         await newRobot.save();
+        const matchModel = createMatchCollection(req.body.teamNum)
+        const initialMatch = new matchModel ({
+            TeamNum: req.body.teamNum,
+            MatchNo: '',
+            SpeakerNotes: '',
+            AmpNotes: ''
+        });
+        
+        await initialMatch.save();
         res.redirect('/'); // Redirect to the main page
     } catch (e) {
         console.error('Error saving robot:', e); // Log the error
@@ -65,13 +75,15 @@ router.delete('/delete/:teamNum', async (req, res) => {
     try {
         const teamNum = req.params.teamNum;
         await Robot.findOneAndDelete({ TeamNum: teamNum });
+        await mongoose.connection.db.dropCollection(`team_${teamNum}_matches`);
         res.status(200).send({ message: 'Robot deleted successfully' });
+
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Failed to delete robot' });
     }
 });
-module.exports = router;
+
 
 router.put('/update/:teamNum', async (req, res) => {
     const teamNum = req.params.teamNum;
@@ -111,3 +123,5 @@ router.get('/about', async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 });
+
+module.exports = router;

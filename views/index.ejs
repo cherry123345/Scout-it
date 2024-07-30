@@ -1,14 +1,17 @@
 <link rel="stylesheet" href="/css/robot-card.css">  
 
-<button id="openModalBtn" class="addBtn">ADD ROBOT+</button>
-<!-- Error Message -->
-<% if (messages && messages.error && messages.error.length > 0) { %>
-    <% messages.error.forEach(function(message) { %>
-        <div class="alert alert-danger">
-            <%= message %>
-        </div>
-    <% }); %>
-<% } %>
+<div class="add-error-container">
+    <button id="openModalBtn" class="addBtn">ADD ROBOT+</button>
+    <div class="error-messages">
+        <% if (messages && messages.error && messages.error.length > 0) { %>
+            <% messages.error.forEach(function(message) { %>
+                <div class="alert alert-danger">
+                    <%= message %>
+                </div>
+            <% }); %>
+        <% } %>
+    </div>
+</div>
 
 <section class="robots">
     <ul class="robots-ul">
@@ -16,7 +19,8 @@
             <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" 
                 data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" 
                 data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>"
-                data-climbandtrap="<%= bot.ClimbAndTrap %>" data-featuresAndLimitations="<%= bot.SpecialfeaturesAndLimitations %>">
+                data-climbandtrap="<%= bot.ClimbAndTrap %>" data-featuresAndLimitations="<%= bot.SpecialfeaturesAndLimitations %>"
+                data-lastUpdated="<%= bot.lastUpdated %>">
 
                 <% if (bot.RobotImage && bot.RobotImage.length > 0) { %>
                     <img src="data:image/png;base64,<%= bot.RobotImage.toString('base64') %>" alt="Robot Image">

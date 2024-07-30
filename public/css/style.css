@@ -20,13 +20,10 @@ body{
   background-color: rgb(255, 112, 17);
   border: none;
   padding: 20px;
-  margin-left: 20px;
   border-radius: 30px;
   font-weight: bold; /* Optional: make the text bold */
   font-size: large;
   font-family: "Kode Mono", monospace;
-  position: fixed;
-  z-index: 10;
   color: #002e6a;
 }
 
@@ -44,7 +41,7 @@ body{
   color: #fff;
   font-size: 16px;
   margin-top: 5px;
-  margin-left: 5px;
+  margin-left: 10px;
   max-width: fit-content;
 }
 
@@ -68,8 +65,19 @@ body{
   border: 1px solid #f57c00; /* Darker orange border */
 }
 
-    
+.add-error-container {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  z-index: 10; /* Ensures the container is above other content if necessary */
+  margin-left: 20px;
+  z-index: 10;
+}
 
+.error-messages {
+  display: flex;
+  flex-direction: column; /* Stack error messages vertically */
+}
 
 /* Form styles */
 form {
@@ -104,6 +112,3 @@ select {
     border: 1px solid #ccc;
     border-radius: 5px;
 }
-
-
-  
