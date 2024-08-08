@@ -178,3 +178,55 @@
 
 
 }
+
+
+
+/* For all readonly inputs */
+input[readonly] {
+    color: #000000 !important; 
+    border: 1px solid #ccc !important;
+    background-color: #e1e1e1 !important; 
+    font-family: "Chakra Petch", sans-serif;
+    font-size:small;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+input {
+  color: #000000 !important; 
+  border: 1px solid #ccc !important;
+  background-color: #ffffff !important; 
+  font-family: "Chakra Petch", sans-serif;
+  font-size:small;
+  text-transform: uppercase;
+}
+
+/* Increase specificity by including an ID or class */
+#modalDrivetrain:disabled, 
+#modalScorePlace:disabled, 
+#modalAdjustableShooter:disabled, 
+#modalClimbAndTrap:disabled,
+#trap:disabled,
+#climb:disabled {
+    color: #000000 !important; 
+    background-color: #e1e1e1 !important; 
+    font-family: "Chakra Petch", sans-serif;
+    font-size: small;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+
+#modalDrivetrain, 
+#modalScorePlace, 
+#modalAdjustableShooter, 
+#modalClimbAndTrap,
+#trap,
+#climb {
+    color: #000000 !important; 
+    background-color: #ffffff !important; 
+    font-family: "Chakra Petch", sans-serif;
+    font-size: small;
+    text-transform: uppercase;
+}
+
