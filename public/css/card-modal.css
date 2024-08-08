@@ -1,4 +1,3 @@
-
 /* Modal styles */
 .modal {
   display: none; /* Hidden by default */
@@ -20,7 +19,7 @@
   justify-content: center; /* Center horizontally */
 }
   
-  /* Modal Content */
+/* Modal Content */
 .modal-content {
   background-color: #fefefe;
   margin:  auto; /* 15% from the top and centered */
@@ -32,7 +31,7 @@
   overflow: auto;
 }
 
-.modal-content p{
+.modal-content p {
   padding-bottom: 10px;
 }
 
@@ -51,6 +50,23 @@
   cursor: pointer;
 }
 
+.changeImage-button {
+  background-color: rgb(255, 112, 17);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  font-family: "Chakra Petch", sans-serif;
+  margin-bottom: 10px;
+  margin-left: 20px;
+}
+
+.changeImage-button:hover {
+  background-color: rgb(239, 212, 179);
+}
+
 .delete-button {
   background-color: rgb(205, 18, 18);
   color: white;
@@ -60,13 +76,14 @@
   border-radius: 5px;
   transition: background-color 0.3s ease;
   font-family: "Chakra Petch", sans-serif;
+  margin-left: 30px;
 }
 
 .delete-button:hover {
   background-color: rgb(255, 0, 0);
 }
 
-.edit-button{
+.edit-button {
   background-color: rgb(20, 138, 24);
   color: white;
   border: none;
@@ -77,11 +94,11 @@
   font-family: "Chakra Petch", sans-serif;
 }
 
-.edit-button:hover{
+.edit-button:hover {
   background-color: rgb(53, 186, 13);
 }
 
-.save-button{
+.save-button {
   background-color: rgb(20, 138, 24);
   color: white;
   border: none;
@@ -91,23 +108,28 @@
   transition: background-color 0.3s ease;
 }
 
-.save-button:hover{
+.save-button:hover {
   background-color: rgb(53, 186, 13);
 }
 
-
-.modal-btn{
+.modal-btn {
   padding-top: 10px;
 }
 
-.update-form{
+.update-form {
   display: flex;
   flex-direction: column;
   gap: 5px;
   font-family: "Share Tech Mono", monospace;
 }
 
-.update-form select {
+.contents {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.contents select {
   width: 100%;
   height: auto; /* Adjust height as needed */
   overflow-y: scroll;
@@ -116,7 +138,43 @@
   border-radius: 5px;
 }
 
-.card-title{
+.card-title {
   font-family: "Chakra Petch", sans-serif;
   text-transform: uppercase;
+}
+
+/* New styles for header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-header h2 {
+  margin: 0;
+}
+
+.card-header select {
+  width: 100px; /* Set desired width */
+  padding: 7px; /* Adjust padding */
+  border-radius: 5px;
+  margin-bottom: 10px;
+  margin-left: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+
+/* 1 card per row */
+@media (max-width: 576px) {
+  .card-header select{
+    margin-left: 1px; /* Reduced margin */ /* 100% width minus margin for 1 card per row */
+    margin-right: 0;
+  }
+
+  .card-header {
+    gap: 5px;
+  }
+
+
 }

@@ -25,27 +25,5 @@
 </html>
 
 <!-- JavaScript for modal functionality -->
-<script>
-  // Get the modal and button elements
-  const modal = document.getElementById("addRobotModal");
-  const openModalBtn = document.getElementById("openModalBtn");
-  const closeModalBtn = document.getElementById("closeModalBtn");
 
-  // Open the modal
-  openModalBtn.onclick = function() {
-    modal.style.display = "flex";
-  }
-
-  // Close the modal
-  closeModalBtn.onclick = function() {
-    modal.style.display = "none";
-  }
-
-  // Close the modal if the user clicks outside of the modal content
-  window.onclick = function(event) {
-    if (event.target === modal) {
-      modal.style.display = "none";
-    }
-  }
-</script>
 

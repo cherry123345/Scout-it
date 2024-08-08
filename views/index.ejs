@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="/css/robot-card.css">  
-
 <div class="add-error-container">
     <button id="openModalBtn" class="addBtn">ADD ROBOT+</button>
     <div class="error-messages">
@@ -15,15 +14,12 @@
 
 <section class="robots">
     <ul class="robots-ul">
+        <!--data coming from the get method rendering this page-->
         <% data.forEach(bot => { %>
-            <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" 
-                data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" 
-                data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>"
-                data-climbandtrap="<%= bot.ClimbAndTrap %>" data-featuresAndLimitations="<%= bot.SpecialfeaturesAndLimitations %>"
-                data-lastUpdated="<%= bot.lastUpdated %>">
-
+            <!-- setting atrributes for each bot in their assigned card -->
+            <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>"data-climbandtrap="<%= bot.ClimbAndTrap %>" data-SpecialfeaturesAndLimitations="<%= bot.SpecialfeaturesAndLimitations %>" data-lastUpdated="<%= bot.lastUpdated %>">
                 <% if (bot.RobotImage && bot.RobotImage.length > 0) { %>
-                    <img src="data:image/png;base64,<%= bot.RobotImage.toString('base64') %>" alt="Robot Image">
+                    <img src="data:image/png;base64,<%= bot.RobotImage.toString('base64') %>" alt="Robot Image"> <!-- image from database -->
                 <% } else { %>
                     <img  src="/img/robot-placeholder.png" alt="Placeholder Image">
                 <% } %>
@@ -33,8 +29,29 @@
         <% }) %>
     </ul>
 </section>
+<%- include('partials/card-modal') %>
 
-<!-- Modal -->
 
-
-<%- include('partials/card-modal.ejs') %>
+<script>
+    // Get the modal and button elements
+    const addModal = document.getElementById("addRobotModal");
+    const openModalBtn = document.getElementById("openModalBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+  
+    // Open the modal
+    openModalBtn.onclick = function() {
+        addModal.style.display = "flex";
+    }
+  
+    // Close the modal
+    closeModalBtn.onclick = function() {
+        addModal.style.display = "none";
+    }
+  
+    // Close the modal if the user clicks outside of the modal content
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        addModal.style.display = "none";
+      }
+    }
+</script>

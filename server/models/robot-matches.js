@@ -1,14 +1,15 @@
-const mongoose = require('mongoose'); 
-const { type } = require('os');
+const mongoose = require('mongoose');
 
-// Function to create a new collection for matches
 const createMatchCollection = (teamNum) => {
+    const modelName = `Team_${teamNum}_Matches`;
+    if (mongoose.models[modelName]) {
+        return mongoose.model(modelName);
+    }
+
     const matchSchema = new mongoose.Schema({
-        TeamNum: {
-            type: Number,
-        },
         MatchNo: {
             type: Number,
+            unique: true,
         },
         SpeakerNotes: {
             type: Number,
@@ -16,10 +17,39 @@ const createMatchCollection = (teamNum) => {
         AmpNotes: {
             type: Number,
         },
+        PassedNotes: {
+            type: Number,
+        },
+        AutoNotes: {
+            type: Number,
+        },
+        Climb: {
+            type: String,
+        },
+        Trap: {
+            type: String,
+        },
+        AdditionalNotes: {
+            type: String,
+        },
+        lastUpdated: {
+            type: Date,
+            default: Date.now,
+        }
     });
 
-    // Create a new model for the matches collection
-    return mongoose.model(`Team_${teamNum}_Matches`, matchSchema);
+    // Middleware to update `lastUpdated` field before each save
+    matchSchema.pre('save', function(next) {
+        this.lastUpdated = Date.now();
+        next();
+    });
+
+    matchSchema.pre('findOneAndUpdate', function(next) {
+        this.set({ lastUpdated: Date.now() });
+        next();
+    });
+    
+    return mongoose.model(modelName, matchSchema);
 };
 
 module.exports = createMatchCollection;

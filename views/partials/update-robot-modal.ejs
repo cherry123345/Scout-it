@@ -1,0 +1,59 @@
+<!-- Modal -->
+<link rel="stylesheet" href="/css/update-robot-modal.css">  
+<div id="updateNameImage" class="updateModal">
+    <div class="update-modal-content">
+        <span class="update-modal-close-btn">&times;</span>
+        <h2 class="card-title">Update Robot Image or Name</h2>
+        <form action="/name-image-update/${teamNum}" class="update-form" method="PUT">
+            <label for="robotName">Robot Name:</label>
+            <input type="text" id="newrobotName" name="robotName">
+
+            <label for="robotImage">Upload or Take a Picture:</label>
+            <input type="file" id="newrobotImage" name="newrobotImage" accept="image/*" capture>
+        </form>
+        <div class="modal-btn">
+            <button id="updatebtn" class="save-button">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const updateModal = document.getElementById('updateNameImage'); //modal for updating name and image(update-robot-modal.ejs)
+    const updateSpan = document.getElementsByClassName('update-modal-close-btn')[0];
+    const updateButton = document.getElementById('updatebtn');
+    const robotName = document.getElementById('newrobotName');
+    const robotImage = document.getElementById('newrobotImage');
+
+    
+        // Close the match scout modal when close button is pressed
+        updateSpan.onclick = () => {
+            updateModal.style.display = 'none';
+        };
+
+        updateButton.addEventListener('click', async () => {
+            const teamNum = updateButton.getAttribute('data-team-num');
+            
+            const formData = new FormData();
+            formData.append('RobotName', robotName.value);
+            formData.append('RobotImage', robotImage.files[0]); // Assuming single file upload
+
+            try {
+                const response = await fetch(`/name-image-update/${teamNum}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Robot updated successfully');
+                    updateModal.style.display = 'none';
+                    location.reload(); // Refresh the page
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to update robot');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the robot');
+            }
+        });
+</script>

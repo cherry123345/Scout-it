@@ -27,36 +27,28 @@ const RobotSchema = new mongoose.Schema({
     Weight: {
         type: Number
     },
-
     FrameSize: {
         type: String
     },
-
     Drivetrain: {
         type: String
     },
-
     ScorePlace: {
         type: String
     },
-
     AdjustableShooter: {
         type: String
     },
-
     ClimbAndTrap: {
         type: String
     },
-
     SpecialfeaturesAndLimitations: {
         type: String
     },
-
     lastUpdated: {
         type: Date,
         default: Date.now,
     }
-
 }); 
 
 // Middleware to update `lastUpdated` field before each save

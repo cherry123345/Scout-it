@@ -2,21 +2,22 @@ const express = require('express');
 const router = express.Router();
 const Robot = require('../models/robot');
 const multer = require('multer');
-const createMatchCollection = require('../models/robot-matches');
+const MatchCollection = require('../models/robot-matches');
 const mongoose = require('mongoose')
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+
+//get methods
+//get method that renders index page
 router.get('', async (req, res) => {
     const locals = {
         title: "Scout-It",
     }
-
     const messages = {
         error: req.flash('error')
     };
-
     try{
         const data = await Robot.find();
         res.render('index', {locals, data, messages});
@@ -25,8 +26,41 @@ router.get('', async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 });
+//get method that renders about page
+router.get('/about', async (req, res) => {
+    const locals = {
+        title: "Scout-It-About",
+    }
 
+    const messages = {
+        error: req.flash('error')
+    };
 
+    try{
+        res.render('about', {locals, messages});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error'); 
+    }
+});
+router.get('/matches/:teamNum/:matchNo', async (req, res) => {
+    const teamNum = req.params.teamNum;
+    const matchNo = req.params.matchNo;
+    const messages = {
+        error: req.flash('error')
+    };
+    try{
+        const teamsMatches = MatchCollection(teamNum);
+        const matchData = await teamsMatches.findOne({MatchNo: matchNo}).lean();
+        res.json({matchData, messages});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error'); 
+    }
+})
+
+//post methods
+//post methods that adds a new robot in robot collection and makes a new collection for each robot to store matches data
 router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
     const robotImage = req.file ? req.file.buffer : undefined;
 
@@ -37,7 +71,7 @@ router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
         RobotImage: robotImage,
 
         Weight: '',
-        FrameSize: null,
+        FrameSize: '',
         Drivetrain: '',
         ScorePlace: '',
         AdjustableShooter: '',
@@ -47,15 +81,21 @@ router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
 
     try {
         await newRobot.save();
-        const matchModel = createMatchCollection(req.body.teamNum)
-        const initialMatch = new matchModel ({
-            TeamNum: req.body.teamNum,
-            MatchNo: '',
-            SpeakerNotes: '',
-            AmpNotes: ''
-        });
-        
-        await initialMatch.save();
+        const matchModel = MatchCollection(req.body.teamNum)
+        for(let i = 1; i <= 12; i++){
+            const initialMatch = new matchModel ({
+                MatchNo: i,
+                SpeakerNotes: '',
+                AmpNotes: '',
+                PassedNotes: '',
+                AutoNotes: '',
+                Climb: '',
+                Trap: '',
+                AdditionalNotes: ''
+            });
+            
+            await initialMatch.save();
+        }
         res.redirect('/'); // Redirect to the main page
     } catch (e) {
         console.error('Error saving robot:', e); // Log the error
@@ -66,7 +106,7 @@ router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
             res.redirect('/');
         } else {
             // Handle other types of errors
-            res.status(500).send('Internal Server Error'); // Send a generic error message
+            res.status(500).send('Internal Server Error');
         }
     }
 })
@@ -85,6 +125,37 @@ router.delete('/delete/:teamNum', async (req, res) => {
 });
 
 
+router.put('/name-image-update/:teamNum', upload.single('RobotImage'), async (req, res) => {
+    const teamNum = req.params.teamNum;
+    const updateData = {};
+
+    // Update the RobotName if provided
+    if (req.body.robotName) {
+        updateData.RobotName = req.body.robotName;
+    }
+
+    // Update the RobotImage only if a file is uploaded
+    if (req.file) {
+        updateData.RobotImage = req.file.buffer;
+    }
+
+    try {
+        const updatedRobot = await Robot.findOneAndUpdate(
+            { TeamNum: teamNum },
+            updateData,
+            { new: true }
+        );
+
+        if (!updatedRobot) {
+            return res.status(404).json({ message: 'Robot not found' });
+        }
+
+        res.status(200).json({ message: 'Robot updated successfully', robot: updatedRobot });
+    } catch (error) {
+        console.error('Error updating robot:', error);
+        res.status(500).json({ message: 'An error occurred while updating the robot' });
+    }
+});
 router.put('/update/:teamNum', async (req, res) => {
     const teamNum = req.params.teamNum;
     const updateData = req.body;
@@ -106,21 +177,27 @@ router.put('/update/:teamNum', async (req, res) => {
         res.status(500).json({ message: 'An error occurred while updating the robot' });
     }
 });
+router.put('/matchupdate/:teamNum/:matchNo', async (req, res) => {
+    const teamNum = req.params.teamNum;
+    const matchNo = req.params.matchNo;
+    const updateData = req.body;
 
-router.get('/about', async (req, res) => {
-    const locals = {
-        title: "Scout-It-About",
-    }
+    try {
+        const matchModel = MatchCollection(teamNum)
+        const updatedmatch = await matchModel.findOneAndUpdate(
+            { MatchNo: matchNo },
+            updateData,
+            { new: true }
+        );
 
-    const messages = {
-        error: req.flash('error')
-    };
+        if (!updatedmatch) {
+            return res.status(404).json({ message: 'match not found' });
+        }
 
-    try{
-        res.render('about', {locals, messages});
+        res.status(200).json({ message: 'match updated successfully', robot: updatedmatch });
     } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error'); 
+        console.error('Error updating match:', error);
+        res.status(500).json({ message: 'An error occurred while updating the match' });
     }
 });
 

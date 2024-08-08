@@ -1,205 +1,226 @@
 <!-- Modal -->
 <link rel="stylesheet" href="/css/card-modal.css">  
 <link rel="stylesheet" href="/css/style.css">
+<%- include('../partials/update-robot-modal.ejs') %>
 <div id="robotModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2 class="card-title" id="modalTeam"></h2>
+        <div class="card-header">
+            <h2 class="card-title" id="modalTeam"></h2>
+            <select name="" id="scout-select">
+                <option value="pit-scout" selected>Pit-scout</option>
+                <option value="1">Match 1</option>
+                <option value="2">Match 2</option>
+                <option value="3">Match 3</option>
+                <option value="4">Match 4</option>
+                <option value="5">Match 5</option>
+                <option value="6">Match 6</option>
+                <option value="7">Match 7</option>
+                <option value="8">Match 8</option>
+                <option value="9">Match 9</option>
+                <option value="10">Match 10</option>
+                <option value="11">Match 11</option>
+                <option value="12">Match 12</option>
+            </select>
+            <button class="changeImage-button" id="openUModalBtn" >Edit Image or name</button>
+        </div>
         <p class="card-title" id="modalRobotName"></p>
         <div class="update-form">
-            <label for="modalWeight">Weight:</label>
-            <input type="number" id="modalWeight" readonly placeholder="">
-            <label for="modalFrameSize">Frame Size:</label>
-            <input type="text" id="modalFrameSize" readonly placeholder="">
-            <label for="modalDrivetrain">Drivetrain:</label>
-            <select id="modalDrivetrain" disabled>
-                <option id="drivetrain-placeholder"value="" selected disabled></option>
-                <option value="Swerve">Swerve</option>
-                <option value="Tank">Tank</option>
-            </select>
-            <label for="modalScorePlace">Score Place:</label>
-            <select id="modalScorePlace" disabled>
-                <option id="scoreplace-placeholder"value="" selected disabled></option>
-                <option value="Amp">Amp</option>
-                <option value="Speaker">Speaker</option>
-                <option value="Both">Both</option>
-            </select>
-            <label for="modalAdjustableShooter">Adjustable Shooter:</label>
-            <select id="modalAdjustableShooter" disabled>
-                <option id="adjustabeshooter-placeholder"value="" selected disabled></option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-            </select>
-            <label for="modalClimbAndTrap">Climb and Trap:</label>
-            <select id="modalClimbAndTrap" disabled>
-                <option id="climbandtrap-placeholder"value="" selected disabled></option>
-                <option value="Climb">Climb</option>
-                <option value="Trap">Trap</option>
-                <option value="Both">Both</option>
-            </select>
-            <label for="modalSpecialfeaturesAndLimitations">Special Features and Limitations:</label>
-            <input type="text" id="modalSpecialfeaturesAndLimitations" placeholder="" readonly>
-            <div class="modal-btn">
-                <button id="editButton" class="edit-button">Edit</button>
-                <button id="saveButton" class="save-button" style="display:none;">Save</button>
-                <button id="deleteButton" class="delete-button">Delete</button>
-            </div>    
-            <p id="lastUpdated" class="last-updated"></p>
+            <div id="pit-scout" class="contents">
+                <%- include('../partials/card-contents/pit-scout.ejs') %>
+            </div>
+            <div id="match-scout" class="contents">
+                <%- include('../partials/card-contents/match-scout.ejs') %>
+            </div>
         </div>
     </div>
 </div>
 
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const modal = document.getElementById('robotModal');
-        const span = document.getElementsByClassName('close')[0];
-        const deleteButton = document.getElementById('deleteButton');
-        const editButton = document.getElementById('editButton');
-        const saveButton = document.getElementById('saveButton');
+        // Initialize variables
+        //Modals
+        const modal = document.getElementById('robotModal'); //the initial modal
+        const updateModal = document.getElementById('updateNameImage'); //modal for updating name and image(update-robot-modal.ejs)
 
-        const inputFields = {
-            Weight: document.getElementById('modalWeight'),
-            FrameSize: document.getElementById('modalFrameSize'),
+        //initial modal contents
+        const pitScoutContent = document.getElementById('pit-scout');//pit scout content
+        const matchScoutContent = document.getElementById('match-scout');// match scout content
+        
+        //Elements
+        const scoutSelect = document.getElementById('scout-select');//the toggle/select bar to change content element
+
+        //Buttons
+        const span = document.getElementsByClassName('close')[0];// the close button for initial modal
+        const openUpdateModalbtn = document.getElementById("openUModalBtn");// button to open (updateModal)
+        const editButton = document.getElementById('editButton');// Edit btn to edit on initial pitscout content
+        const saveButton = document.getElementById('saveButton');// Save btn to Save the edits on pitscout content
+        const deleteButton = document.getElementById('deleteButton');// delete btn to delete the entire data (accessed on pitscout content)
+        const MatchEditButton = document.getElementById('matchEditButton');// Edit btn to edit on mathscout content
+        const MatchSaveButton = document.getElementById('matchSaveButton');// Save btn to save on mathscout content
+        const ImageNameUpdateBtn = document.getElementById('updatebtn');
+        let currentCard = null; // To keep track of the currently open card
+
+
+        // script to open the update modal on btn pressed
+        openUpdateModalbtn.onclick = function() {
+            updateModal.style.display = "flex";
+        }
+        // Close the initial modal when close button is pressed 
+        span.onclick = () => {
+            modal.style.display = 'none';
+        };
+        // Close the any modal when screen outside the modal is clicked
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+            if (event.target == updateModal) {
+                updateModal.style.display = 'none';
+            }
+        };
+
+        // All the Select elements in any modal
+        const selectElements = {
             Drivetrain: document.getElementById('modalDrivetrain'),
             ScorePlace: document.getElementById('modalScorePlace'),
             AdjustableShooter: document.getElementById('modalAdjustableShooter'),
             ClimbAndTrap: document.getElementById('modalClimbAndTrap'),
+            Climb: document.getElementById('climb'),
+            Trap: document.getElementById('trap'),
+        };
+
+///////////////////////////////////////////////////////////pitscout/////////////////////////////////////////////////////////
+        // Fields of the pitscouts required to display content on click of the card
+        const inputFields = {
+            Weight: document.getElementById('modalWeight'),
+            FrameSize: document.getElementById('modalFrameSize'),
+            Drivetrain: document.getElementById('drivetrain-placeholder'),
+            ScorePlace: document.getElementById('scoreplace-placeholder'),
+            AdjustableShooter: document.getElementById('adjustabeshooter-placeholder'),
+            ClimbAndTrap: document.getElementById('climbandtrap-placeholder'),
             SpecialfeaturesAndLimitations: document.getElementById('modalSpecialfeaturesAndLimitations')
         };
 
-
+        // Displaying information on each card when it's clicked
         document.querySelectorAll('.robot-card').forEach(card => {
             card.addEventListener('click', () => {
+                // Update the currentCard reference
+                currentCard = card;
+
+                // Storing the attribute in variables(These are default fields or attribute that are never going to be changed)
                 const teamNum = card.getAttribute('data-teamnum');
                 const teamName = card.getAttribute('data-teamname');
                 const robotName = card.getAttribute('data-robotname');
-                const weight = card.getAttribute('data-weight');
-                const framesize = card.getAttribute('data-framesize');
-                const drivetrain = card.getAttribute('data-drivetrain');
-                const scoreplace = card.getAttribute('data-scoreplace');
-                const adjustabeshooter = card.getAttribute('data-adjustabeshooter');
-                const climbandtrap = card.getAttribute('data-climbandtrap');
-                const featuresAndLimitations = card.getAttribute('data-featuresAndLimitations');
                 const lastUpdated = card.getAttribute('data-lastUpdated');
 
+                // Setting the team number attribute to save and delete button as required for put and delete query
+                saveButton.setAttribute('data-team-num', teamNum);  
+                deleteButton.setAttribute('data-team-num', teamNum);
+                ImageNameUpdateBtn.setAttribute('data-team-num', teamNum);
+
+                // Setting the text content and placeholder of pit-scout modal(Fixed header for entire card and its content)
                 document.getElementById('modalTeam').textContent = `${teamNum}: ${teamName}`;
                 document.getElementById('modalRobotName').textContent = `Robot Name: ${robotName}`;
 
-                document.getElementById('modalWeight').placeholder = `${weight}`;
-                document.getElementById('modalFrameSize').placeholder = `${framesize}`;
-                document.getElementById('drivetrain-placeholder').textContent = `${drivetrain}`;
-                document.getElementById('scoreplace-placeholder').textContent = `${scoreplace}`;
-                document.getElementById('adjustabeshooter-placeholder').textContent = `${adjustabeshooter}`;
-                document.getElementById('climbandtrap-placeholder').textContent = `${climbandtrap}`;
-                document.getElementById('modalSpecialfeaturesAndLimitations').placeholder = `${featuresAndLimitations}`;
-                
+                // Setting date and time in human-readable format(included in end of every card)
                 const lastUpdatedDate = lastUpdated ? new Date(lastUpdated) : null;
                 const formattedDate = lastUpdatedDate ? lastUpdatedDate.toLocaleDateString() : 'N/A';
                 const formattedTime = lastUpdatedDate ? lastUpdatedDate.toLocaleTimeString() : 'N/A';
                 document.getElementById('lastUpdated').textContent = `Last Updated: ${formattedDate} ${formattedTime}`;
 
-
+                // Automatically set the corresponding value from the database for fields
                 Object.keys(inputFields).forEach(key => {
                     const field = inputFields[key];
-                    if (field.tagName === 'SELECT') {
-                        field.value = card.getAttribute(`data-${key.toLowerCase()}`) || ""; // Set dropdown value
-                    } else {
-                        field.value = card.getAttribute(`data-${key.toLowerCase()}`) || ""; // Set input field value
-                    }
-                    field.readOnly = true; 
-                    field.disabled = true
+                    field.value = card.getAttribute(`data-${key.toLowerCase()}`) || "";// setting field value for incase of unchanged update queries
+                    field.placeholder = card.getAttribute(`data-${key.toLowerCase()}`);// displaying content
+                    field.textContent = card.getAttribute(`data-${key.toLowerCase()}`);// displaying content 
+                    field.readOnly = true; // Make every field read-only until the edit button is pressed
+                    field.disabled = true; // make select diabled till its edit button is pressed
                 });
 
-                saveButton.setAttribute('data-team-num', teamNum);
-                deleteButton.setAttribute('data-team-num', teamNum);
-                modal.style.display = 'block';
-                saveButton.style.display = 'none';
-                editButton.style.display = 'inline-block';
+                modal.style.display = 'block'; // Displays the robot modal
+                saveButton.style.display = 'none'; // Hides the save button (only comes after edit is pressed)
+                editButton.style.display = 'inline-block'; // Ensures the edit button is displayed from the start
+
+                scoutSelect.value = 'pit-scout';
+                toggleSections(); // Runs the function to load content (pit-scout option is already selected)
             });
         });
 
-        span.onclick = () => {
-            modal.style.display = 'none';
-        }
-
-        window.onclick = (event) => {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        editButton.addEventListener('click', () => {
-            Object.keys(inputFields).forEach(key => {
-                inputFields[key].disabled = false; // Make fields editable
-                inputFields[key].readOnly = false;
-            });
-            editButton.style.display = 'none';
-            saveButton.style.display = 'inline-block';
-        });
-
+////////////////////////////////////////////////////////////matchscout/////////////////////////////////////////////////////////
         
-        saveButton.addEventListener('click', async () => {
-                const teamNum = saveButton.getAttribute('data-team-num');
-                const updatedData = {};
+        const matchfields = {
+            SpeakerNotes: document.getElementById('speakerNotes'),
+            AmpNotes: document.getElementById('ampNotes'),
+            PassedNotes: document.getElementById('passedNotes'),
+            Climb: document.getElementById('climb-placeholder'),
+            Trap: document.getElementById('trap-placeholder'),
+            AdditionalNotes: document.getElementById('additionalnotes')
+        };
+        
+        // Function to control the contents on the modal through the match select scroll
+        function toggleSections() {
 
-                Object.keys(inputFields).forEach(key => {
-                    updatedData[key] = inputFields[key].value;
-                });
+            //making sure that whenever toggle change happens all save buttons are hidden and editbutton shows
+            editButton.style.display = 'inline-block';
+            saveButton.style.display = 'none';
+            MatchEditButton.style.display = 'inline-block';
+            MatchSaveButton.style.display = 'none';
 
-                try {
-                    const response = await fetch(`/update/${teamNum}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(updatedData)
-                    });
-
-                    if (response.ok) {
-                        alert('Robot updated successfully');
-                        modal.style.display = 'none';
-                        location.reload(); // Refresh the page
-                    } else {
-                        const data = await response.json();
-                        alert(data.message || 'Failed to update robot');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating the robot');
-                }
+            Object.keys(selectElements).forEach(key => {
+                const field = selectElements[key];
+                field.readOnly = true; // Make every field read-only until the edit button is pressed
+                field.disabled = true; // make select diabled till its edit button is pressed
             });
 
-        deleteButton.addEventListener('click', async () => {
-            const teamNum = deleteButton.getAttribute('data-team-num');
+            Object.keys(inputFields).forEach(key => {
+                const field = inputFields[key];
+                field.readOnly = true; // Make every field read-only until the edit button is pressed
+                field.disabled = true; // make select diabled till its edit button is pressed
+            });
 
-            const confirmation = confirm('Do you really want to delete this robot?');
+            if (!currentCard) return;
 
-            if (!confirmation) {
-                return; // Exit the function if the user cancels the confirmation
+            if (scoutSelect.value === 'pit-scout') {
+                pitScoutContent.style.display = 'flex';
+                matchScoutContent.style.display = 'none';
+            } else {
+                const matchNo = scoutSelect.value;
+                const teamNum = saveButton.getAttribute('data-team-num');
+
+                pitScoutContent.style.display = 'none';
+                matchScoutContent.style.display = 'flex';
+
+                fetch(`/matches/${teamNum}/${matchNo}`)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        matchSaveButton.setAttribute('data-team-num', teamNum);
+                        matchSaveButton.setAttribute('data-match-num', matchNo);
+
+                        document.getElementById('matchNo').textContent = `Match No: ${matchNo}`;
+
+                        // Setting date and time in human-readable format
+                        const lastUpdatedDate = data.matchData.lastUpdated ? new Date(data.matchData.lastUpdated) : null;
+                        const formattedDate = lastUpdatedDate ? lastUpdatedDate.toLocaleDateString() : 'N/A';
+                        const formattedTime = lastUpdatedDate ? lastUpdatedDate.toLocaleTimeString() : 'N/A';
+                        document.getElementById('lastmodified').textContent = `Last Updated: ${formattedDate} ${formattedTime}`;
+
+                        // Automatically set the corresponding value from the database for fields
+                        Object.keys(matchfields).forEach(key => {
+                            const field = matchfields[key];
+                            field.value = data.matchData[key]  || ""; // Set input field value
+                            field.textContent = data.matchData[key]
+                            field.readOnly = true; // Make every field read-only until the edit button is pressed
+                            field.disabled = true;
+                        });
+                    })
+                    .catch(error => console.error('Error fetching match data:', error));
             }
+        }
 
-            try {
-                const response = await fetch(`/delete/${teamNum}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    alert('Robot deleted successfully');
-                    modal.style.display = 'none';
-                    location.reload(); // Refresh the page
-                } else {
-                    const data = await response.json();
-                    alert(data.message || 'Failed to delete robot');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while deleting the robot');
-            }
-        });
+        // Detects 'change' in the select element and runs the function
+        scoutSelect.addEventListener('change', toggleSections);
     });
 </script>
