@@ -22,7 +22,7 @@
                 <option value="11">Match 11</option>
                 <option value="12">Match 12</option>
             </select>
-            <button class="changeImage-button" id="openUModalBtn" >Edit Image or name</button>
+            <button class="changeImage-button" id="openUModalBtn">Edit Image/Name</button>
         </div>
         <p class="card-title" id="modalRobotName"></p>
         <div class="update-form">
@@ -120,7 +120,7 @@
                 ImageNameUpdateBtn.setAttribute('data-team-num', teamNum);
 
                 // Setting the text content and placeholder of pit-scout modal(Fixed header for entire card and its content)
-                document.getElementById('modalTeam').textContent = `${teamNum}: ${teamName}`;
+                document.getElementById('modalTeam').textContent = `${teamNum}`;
                 document.getElementById('modalRobotName').textContent = `Robot Name: ${robotName}`;
 
                 // Setting date and time in human-readable format(included in end of every card)
