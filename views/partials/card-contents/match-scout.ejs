@@ -5,6 +5,8 @@
 <input type="number" id="ampNotes" readonly placeholder="">
 <label for="PassedNotes">PassedNotes:</label>
 <input type="number" id="passedNotes" readonly placeholder="">
+<label for="autoNotes">AutoNotes:</label>
+<input type="number" id="autoNotes" readonly placeholder="">
 <label for="climb">Climb:</label>
 <select id="climb" disabled>
     <option id="climb-placeholder" value="" selected disabled></option>
@@ -16,6 +18,12 @@
     <option id="trap-placeholder" value="" selected disabled></option>
     <option value="Yes">Yes</option>
     <option value="No">No</option>
+</select>
+<label for="WinLoss">Win/Loss:</label>
+<select id="winloss" disabled>
+    <option id="winloss-placeholder" value="" selected disabled></option>
+    <option value="Win">Win</option>
+    <option value="Loss">Loss</option>
 </select>
 <label for="AdditionalNotes">Additional Notes:</label>
 <input type="text" id="additionalnotes" readonly placeholder="">
@@ -35,8 +43,10 @@
             SpeakerNotes: document.getElementById('speakerNotes'),
             AmpNotes: document.getElementById('ampNotes'),
             PassedNotes: document.getElementById('passedNotes'),
+            AutoNotes: document.getElementById('autoNotes'),
             Climb: document.getElementById('climb'),
             Trap: document.getElementById('trap'),
+            WinLoss: document.getElementById('winloss'),
             AdditionalNotes: document.getElementById('additionalnotes')
         };
 

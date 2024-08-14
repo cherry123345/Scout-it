@@ -14,14 +14,14 @@
 
 <section class="robots">
     <ul class="robots-ul">
-        <!--data coming from the get method rendering this page-->
-        <% data.forEach(bot => { %>
-            <!-- setting atrributes for each bot in their assigned card -->
-            <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>"data-climbandtrap="<%= bot.ClimbAndTrap %>" data-SpecialfeaturesAndLimitations="<%= bot.SpecialfeaturesAndLimitations %>" data-lastUpdated="<%= bot.lastUpdated %>">
+        <!-- Sort the data array by team number before rendering -->
+        <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
+            <!-- setting attributes for each bot in their assigned card -->
+            <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>" data-climbandtrap="<%= bot.ClimbAndTrap %>" data-autostrats="<%= bot.AutoStrats %>" data-specialfeaturesandlimitations="<%= bot.SpecialfeaturesAndLimitations %>" data-lastupdated="<%= bot.lastUpdated %>">
                 <% if (bot.RobotImage && bot.RobotImage.length > 0) { %>
                     <img src="data:image/png;base64,<%= bot.RobotImage.toString('base64') %>" alt="Robot Image"> <!-- image from database -->
                 <% } else { %>
-                    <img  src="/img/robot-placeholder.png" alt="Placeholder Image">
+                    <img src="/img/robot-placeholder.png" alt="Placeholder Image">
                 <% } %>
                 <div class="team-number"><%= bot.TeamNum %></div>
                 <div class="team-name"><%= bot.TeamName %></div>

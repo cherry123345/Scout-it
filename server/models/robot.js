@@ -42,6 +42,9 @@ const RobotSchema = new mongoose.Schema({
     ClimbAndTrap: {
         type: String
     },
+    AutoStrats: {
+        type: String
+    },
     SpecialfeaturesAndLimitations: {
         type: String
     },

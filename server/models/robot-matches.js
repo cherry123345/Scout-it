@@ -29,6 +29,9 @@ const createMatchCollection = (teamNum) => {
         Trap: {
             type: String,
         },
+        WinLoss:{
+            type: String,
+        },
         AdditionalNotes: {
             type: String,
         },

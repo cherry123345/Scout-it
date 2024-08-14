@@ -1,0 +1,155 @@
+<link rel="stylesheet" href="/css/analysis.css">  
+<div class="analysis-title">
+    <select class="analysis-select" id="analysis-select">
+        <option selected disabled>Select a team</option>
+        <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
+            <option value="<%= bot.TeamNum %>" 
+                data-team-name="<%= bot.TeamName %>" 
+                data-robotname="<%= bot.RobotName %>"
+                data-weight="<%= bot.Weight %>" 
+                data-framesize="<%= bot.FrameSize %>" 
+                data-drivetrain="<%= bot.Drivetrain %>" 
+                data-scoreplace="<%= bot.ScorePlace %>" 
+                data-adjustableshooter="<%= bot.AdjustableShooter %>"
+                data-climbandtrap="<%= bot.ClimbAndTrap %>" 
+                data-autostrats="<%= bot.AutoStrats %>" 
+                data-specialfeaturesAndlimitations="<%= bot.SpecialfeaturesAndLimitations %>" 
+                data-robot-image="<%= bot.RobotImage ? bot.RobotImage.toString('base64') : '' %>"><%= bot.TeamNum %></option>
+        <%})%>
+    </select>
+    <h2 class="robot-heading" id="robot-heading">TeamNum: teamName</h2>
+</div>
+<div class="analysis-content">
+    <div class="analysis-image">
+        <img id="analysis-image" src="/img/robot-placeholder.png" alt="Placeholder Image">
+    </div>
+    <div class="right-section">
+        <div class="spread-sheet">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Match No:</th>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        <th>5</th>
+                        <th>6</th>
+                        <th>7</th>
+                        <th>8</th>
+                        <th>9</th>
+                        <th>10</th>
+                        <th>11</th>
+                        <th>12</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table body here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="general-content">
+            <div class="colum">
+                <h2 id="robotname">RobotName</h2>
+                <h4 id="weight">Weight</h4>
+                <h4 id="framesize">Frame Size</h4>
+                <h4 id="drivetrain">Drivetrain</h4>
+                <h4 id="scoreplace">Score Place</h4>
+            </div>
+            <div class="colum-2">
+                <h4 id="adjustableshooter">Adjustable Shooter</h4>
+                <h4 id="climbandtrap">Climb and Trap</h4>
+                <h4 id="autostrat">Auto</h4>
+                <h4 id="specialfeaturesandlimitations">Special Features and Limitations</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const analysisSelect = document.getElementById('analysis-select');
+    const robotHeading = document.getElementById('robot-heading');
+
+    const fields = [
+    "SpeakerNotes",
+    "AmpNotes",
+    "PassedNotes",
+    "AutoNotes",
+    "Climb",
+    "Trap",
+    "WinLoss"
+    ];
+    
+    function analysisToggle() {
+        const selectedOption = analysisSelect.options[analysisSelect.selectedIndex];
+        const analysisTeamNum = selectedOption.value
+        const analysisTeamName = selectedOption.getAttribute('data-team-name');
+        const robotImage = selectedOption.getAttribute('data-robot-image');
+        const imageElement = document.getElementById('analysis-image');
+
+        const inputFields = {
+            RobotName: document.getElementById('robotname'),
+            Weight: document.getElementById('weight'),
+            FrameSize: document.getElementById('framesize'),
+            Drivetrain: document.getElementById('drivetrain'),
+            ScorePlace: document.getElementById('scoreplace'),
+            AdjustableShooter: document.getElementById('adjustableshooter'),
+            ClimbAndTrap: document.getElementById('climbandtrap'),
+            AutoStrats: document.getElementById('autostrat'),
+            SpecialfeaturesAndLimitations: document.getElementById('specialfeaturesandlimitations')
+        };
+
+        robotHeading.textContent = `${analysisTeamNum}: ${analysisTeamName}`;
+        if (robotImage && robotImage.length > 0) {
+            imageElement.src = `data:image/png;base64,${robotImage}`;
+        } else {
+            imageElement.src = '/img/robot-placeholder.png';
+        }
+
+        // Clear previous rows
+        const tableBody = document.querySelector('.spread-sheet tbody');
+        tableBody.innerHTML = '';
+
+        fields.forEach(async (field) => {
+        const row = document.createElement('tr');
+        const cellName = document.createElement('td');
+        cellName.textContent = field;
+        row.appendChild(cellName);
+
+        // Collect all fetch promises
+        const fetchPromises = [];
+        for(let i = 1; i <= 12; i++) {
+            fetchPromises.push(fetch(`/analysis/${analysisTeamNum}/${i}/${field}`)
+                .then(response => response.json())
+                .then(data => data[field])
+                .catch(error => {
+                    console.error('Error fetching match data:', error);
+                    return ''; // Return empty if there is an error
+                }));
+        }
+
+        // Wait for all fetches to complete
+        const results = await Promise.all(fetchPromises);
+
+        // Append cells to the row in correct order
+        results.forEach(result => {
+            const cell = document.createElement('td');
+            cell.textContent = result;
+            row.appendChild(cell);
+        });
+
+        // Append the row to the table body
+        tableBody.appendChild(row);
+
+        Object.keys(inputFields).forEach(key => {
+            const field = inputFields[key];
+            text = selectedOption.getAttribute(`data-${key.toLowerCase()}`);// displaying content 
+            field.textContent = `${key}: ${text}`
+        });
+    });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        analysisSelect.addEventListener('change' , analysisToggle)
+    });
+</script>

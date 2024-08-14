@@ -213,7 +213,8 @@ input {
 #modalAdjustableShooter:disabled, 
 #modalClimbAndTrap:disabled,
 #trap:disabled,
-#climb:disabled {
+#climb:disabled,
+#winloss:disabled {
     color: #000000 !important; 
     background-color: #e1e1e1 !important; 
     font-family: "Chakra Petch", sans-serif;
@@ -228,7 +229,8 @@ input {
 #modalAdjustableShooter, 
 #modalClimbAndTrap,
 #trap,
-#climb {
+#climb,
+#winloss {
     color: #000000 !important; 
     background-color: #ffffff !important; 
     font-family: "Chakra Petch", sans-serif;

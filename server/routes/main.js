@@ -8,7 +8,6 @@ const mongoose = require('mongoose')
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
 //get methods
 //get method that renders index page
 router.get('', async (req, res) => {
@@ -43,6 +42,7 @@ router.get('/about', async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 });
+//get method to fetch the match of the robot
 router.get('/matches/:teamNum/:matchNo', async (req, res) => {
     const teamNum = req.params.teamNum;
     const matchNo = req.params.matchNo;
@@ -58,8 +58,43 @@ router.get('/matches/:teamNum/:matchNo', async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 })
+//get method to get full analysis of the data and renders analysis page
+router.get('/analysis', async (req, res) => {
+    const locals = {
+        title: "Scout-It-Analysis",
+    }
 
-//post methods
+    const messages = {
+        error: req.flash('error')
+    };
+
+    const data = await Robot.find();
+    try{
+        res.render('analysis', {locals, data, messages});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error'); 
+    }
+});
+router.get('/analysis/:teamNum/:matchno/:field', async (req, res) => {
+    const teamNum = req.params.teamNum;
+    const matchNo = req.params.matchno;
+    const field = req.params.field;
+    const messages = {
+        error: req.flash('error')
+    };
+    try{
+        const teamsMatches = MatchCollection(teamNum);
+        const matchData = await teamsMatches.findOne({MatchNo: matchNo}).lean();
+        res.json({[field]: matchData[field], messages});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error'); 
+    }
+});
+
+
+////////////////////////////////////////////////////post methods///////////////////////////////////////////////////////////////////////////////
 //post methods that adds a new robot in robot collection and makes a new collection for each robot to store matches data
 router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
     const robotImage = req.file ? req.file.buffer : undefined;
@@ -76,6 +111,7 @@ router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
         ScorePlace: '',
         AdjustableShooter: '',
         ClimbAndTrap: '',
+        AutoStrats: '',
         SpecialfeaturesAndLimitations: ''
     })
 
@@ -111,6 +147,7 @@ router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
     }
 })
 
+//delete method to delete entire data or a robot
 router.delete('/delete/:teamNum', async (req, res) => {
     try {
         const teamNum = req.params.teamNum;
@@ -124,7 +161,8 @@ router.delete('/delete/:teamNum', async (req, res) => {
     }
 });
 
-
+//put methods
+//put methods to change the image and robot name
 router.put('/name-image-update/:teamNum', upload.single('RobotImage'), async (req, res) => {
     const teamNum = req.params.teamNum;
     const updateData = {};
@@ -156,6 +194,7 @@ router.put('/name-image-update/:teamNum', upload.single('RobotImage'), async (re
         res.status(500).json({ message: 'An error occurred while updating the robot' });
     }
 });
+//put method to update the pitscout
 router.put('/update/:teamNum', async (req, res) => {
     const teamNum = req.params.teamNum;
     const updateData = req.body;
@@ -177,6 +216,7 @@ router.put('/update/:teamNum', async (req, res) => {
         res.status(500).json({ message: 'An error occurred while updating the robot' });
     }
 });
+//put method to update the matchs of the robot
 router.put('/matchupdate/:teamNum/:matchNo', async (req, res) => {
     const teamNum = req.params.teamNum;
     const matchNo = req.params.matchNo;
