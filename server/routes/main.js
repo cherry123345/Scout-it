@@ -1,16 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const Robot = require('../models/robot');
 const multer = require('multer');
 const MatchCollection = require('../models/robot-matches');
+
+const Robot = require('../models/robot');
+const Users = require('../models/users');
 const mongoose = require('mongoose')
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-//get methods
-//get method that renders index page
+//*----------------------------------------------------------getmethods------------------------------------------------>
+
+//^homepage
 router.get('', async (req, res) => {
+    const loggedInUserId = req.session.user ? req.session.user._id : null;
     const locals = {
         title: "Scout-It",
     }
@@ -19,13 +23,14 @@ router.get('', async (req, res) => {
     };
     try{
         const data = await Robot.find();
-        res.render('index', {locals, data, messages});
+        res.render('index', {locals, data, messages, loggedInUserId});
     } catch (error) {
         console.log(error);
         res.status(500).send('Internal Server Error'); 
     }
 });
-//get method that renders about page
+
+//^about-page
 router.get('/about', async (req, res) => {
     const locals = {
         title: "Scout-It-About",
@@ -42,7 +47,8 @@ router.get('/about', async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 });
-//get method to fetch the match of the robot
+
+//^fetching-math-data
 router.get('/matches/:teamNum/:matchNo', async (req, res) => {
     const teamNum = req.params.teamNum;
     const matchNo = req.params.matchNo;
@@ -58,7 +64,8 @@ router.get('/matches/:teamNum/:matchNo', async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 })
-//get method to get full analysis of the data and renders analysis page
+
+//^analysis-page
 router.get('/analysis', async (req, res) => {
     const locals = {
         title: "Scout-It-Analysis",
@@ -76,6 +83,8 @@ router.get('/analysis', async (req, res) => {
         res.status(500).send('Internal Server Error'); 
     }
 });
+
+//^fetching all the data for spread sheet
 router.get('/analysis/:teamNum/:matchno/:field', async (req, res) => {
     const teamNum = req.params.teamNum;
     const matchNo = req.params.matchno;
@@ -93,151 +102,448 @@ router.get('/analysis/:teamNum/:matchno/:field', async (req, res) => {
     }
 });
 
+//^selection-list-page
+router.get('/selection-list', async (req, res) => {
+    const locals = {
+        title: "Scout-It",
+    }
+    const messages = {
+        error: req.flash('error')
+    };
+    try{
+        const data = await Robot.find();
+        res.render('selection-list', {locals, data, messages});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error'); 
+    }
+});
 
-////////////////////////////////////////////////////post methods///////////////////////////////////////////////////////////////////////////////
-//post methods that adds a new robot in robot collection and makes a new collection for each robot to store matches data
-router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
-    const robotImage = req.file ? req.file.buffer : undefined;
-
-    const newRobot = new Robot ({
-        TeamNum: req.body.teamNum,
-        TeamName: req.body.teamName,
-        RobotName: req.body.robotName,
-        RobotImage: robotImage,
-
-        Weight: '',
-        FrameSize: '',
-        Drivetrain: '',
-        ScorePlace: '',
-        AdjustableShooter: '',
-        ClimbAndTrap: '',
-        AutoStrats: '',
-        SpecialfeaturesAndLimitations: ''
-    })
-
+//^user-login-page
+router.get('/user-login', (req, res) => {
+    const locals = {
+        title: "Scout-It",
+    };
+    const messages = {
+        error: req.flash('error'),
+    };
     try {
-        await newRobot.save();
-        const matchModel = MatchCollection(req.body.teamNum)
-        for(let i = 1; i <= 12; i++){
-            const initialMatch = new matchModel ({
-                MatchNo: i,
-                SpeakerNotes: '',
-                AmpNotes: '',
-                PassedNotes: '',
-                AutoNotes: '',
-                Climb: '',
-                Trap: '',
-                AdditionalNotes: ''
-            });
-            
-            await initialMatch.save();
-        }
-        res.redirect('/'); // Redirect to the main page
-    } catch (e) {
-        console.error('Error saving robot:', e); // Log the error
+        res.render('user-login', { layout: './layouts/login', locals, messages });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
-        if (e.code === 11000) {
-            // Handle duplicate key error
-            req.flash('error', 'Team number already exists. Try Again');
-            res.redirect('/');
-        } else {
-            // Handle other types of errors
+//^admin-login-page (only access by direct link)
+router.get('/admin', (req, res) => {
+    const locals = {
+        title: "Scout-It",
+    };
+    const messages = {
+        error: req.flash('error'),
+    };
+    try {
+        res.render('admin-login', { layout: './layouts/login', locals, messages });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+//^admin-portal-page
+router.get('/admin-portal', async (req, res) => {
+    if (req.session.user && req.session.user.roles === 'admin') {
+        const loggedInUserId = req.session.user._id;
+        const locals = {
+            title: "Scout-It",
+        };
+        const messages = {
+            error: req.flash('error'),
+        };
+        try {
+            const data = await Users.find();
+            res.render('admin-portal', {locals, messages, data, loggedInUserId });
+        } catch (error) {
+            console.log(error);
             res.status(500).send('Internal Server Error');
         }
+    } else {
+        res.status(403).send({ message: 'Access denied. Admins only.' });
+    }
+});
+
+//^logout
+router.get('/logout', (req, res) => {
+    // Destroy the session
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            res.redirect('/');
+        } else {
+            res.redirect('/');
+        }
+    });
+});
+
+//*----------------------------------------------------------postmethods------------------------------------------------>
+
+//^add-robots
+router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+        const robotImage = req.file ? req.file.buffer : undefined;
+
+        const newRobot = new Robot ({
+            TeamNum: req.body.teamNum,
+            TeamName: req.body.teamName,
+            RobotName: req.body.robotName,
+            RobotImage: robotImage,
+
+            Weight: '',
+            FrameSize: '',
+            Drivetrain: '',
+            ScorePlace: '',
+            AdjustableShooter: '',
+            ClimbAndTrap: '',
+            AutoStrats: '',
+            SpecialfeaturesAndLimitations: '',
+            lastUpdatedBy: ''
+        })
+
+        try {
+            await newRobot.save();
+            const matchModel = MatchCollection(req.body.teamNum)
+            for(let i = 1; i <= 12; i++){
+                const initialMatch = new matchModel ({
+                    MatchNo: i,
+                    SpeakerNotes: '',
+                    AmpNotes: '',
+                    PassedNotes: '',
+                    AutoNotes: '',
+                    Climb: '',
+                    Trap: '',
+                    AdditionalNotes: '',
+                    lastUpdatedBy: ''
+                });
+                
+                await initialMatch.save();
+            }
+            res.redirect('/'); // Redirect to the main page
+        } catch (e) {
+            console.error('Error saving robot:', e); // Log the error
+
+            if (e.code === 11000) {
+                // Handle duplicate key error
+                req.flash('error', 'Team number already exists. Try Again');
+                res.redirect('/');
+            } else {
+                // Handle other types of errors
+                res.status(500).send('Internal Server Error');
+            }
+        }
+    } else {
+        res.status(403).json({ 
+            message: 'Access denied', 
+            success: false 
+        });
     }
 })
 
-//delete method to delete entire data or a robot
-router.delete('/delete/:teamNum', async (req, res) => {
+//^admin-log-in
+router.post('/admin/login', async (req, res) => {
+    const { username, password } = req.body;
     try {
-        const teamNum = req.params.teamNum;
-        await Robot.findOneAndDelete({ TeamNum: teamNum });
-        await mongoose.connection.db.dropCollection(`team_${teamNum}_matches`);
-        res.status(200).send({ message: 'Robot deleted successfully' });
+        const user = await Users.findOne({ username });
 
+        if (!user || user.password !== password) {
+            req.flash('error', 'Invalid username or password');
+            return res.redirect('/admin'); // Redirect to the login page
+        }
+
+        req.session.user = user;
+
+        if (user.roles === 'admin') {
+            req.session.user = user;
+            req.session.loginTime = Date.now();
+            req.session.cookie.maxAge = 50000000;//5 min
+            res.redirect('/');
+        } else {
+            req.flash('error', 'Only admin accounts allowed here');
+            res.redirect('/admin');
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).send({ message: 'Failed to delete robot' });
+        req.flash('error', 'Internal Server Error');
+        res.redirect('/admin'); // Redirect to the login page
     }
 });
 
-//put methods
-//put methods to change the image and robot name
+//^user-log-in
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const user = await Users.findOne({ username });
+
+        if (!user || user.password !== password) {
+            req.flash('error', 'Invalid username or password');
+            return res.redirect('/user-login'); // Redirect to the login page
+        }
+
+        req.session.user = user;
+        if (user.roles === 'scout') {
+            req.session.user = user;
+            req.session.loginTime = Date.now();
+            req.session.cookie.maxAge = 50000000;//5 min
+            res.redirect('/');
+        } else {
+            req.flash('error', 'Admins can not login here');
+            return res.redirect('/user-login');
+        }
+    } catch (error) {
+        console.error(error);
+        req.flash('error', 'Internal Server Error');
+        res.redirect('/user-login'); // Redirect to the login page
+    }
+});
+
+//^add-users
+router.post('/admin/add-user',  async (req, res) => {
+    const userdata = req.body;
+    const newUser = new Users(userdata);
+
+    try{
+        await newUser.save();
+        return res.status(200).json({
+            message: 'User added successfully',
+            success: true
+        });
+    } catch (e) {
+        console.error('Error saving robot:', e); // Log the error
+    
+        if (e.code === 11000) {
+            res.status(409).json({ 
+                message: 'Username already exists', 
+                success: false 
+            });
+        } else {
+            res.status(500).json({ 
+                message: 'Internal Server error', 
+                success: false 
+            });
+        }
+    }
+});
+
+//*----------------------------------------------------------deletemethods------------------------------------------------>
+
+//^delete-robot
+router.delete('/delete/:teamNum', async (req, res) => {
+    if (req.session.user && req.session.user.roles === 'admin') {
+        try {
+            const teamNum = req.params.teamNum;
+            await Robot.findOneAndDelete({ TeamNum: teamNum });
+            await mongoose.connection.db.dropCollection(`team_${teamNum}_matches`);
+            res.status(200).json({ 
+                message: 'Robot deleted successfully', 
+                success: true,  
+            });
+        } catch (error) {
+            res.status(500).json({ 
+                message: 'Failed to delete user', 
+                success: false 
+            });
+        }
+    } else {
+        res.status(403).json({ 
+            message: 'Access denied', 
+            success: false 
+        });
+    }
+});
+
+//^delete-user
+router.delete('/admin/delete-user/:id', async (req, res) => {
+    if (req.session.user && req.session.user.roles === 'admin') {
+        try {
+            const uid = req.params.id;
+            await Users.findOneAndDelete({ _id: uid });
+            res.status(200).json({ 
+                message: 'user deleted successfully', 
+                success: true,  
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ 
+                message: 'Failed to delete user', 
+                success: false 
+            });
+        }
+    } else {
+        res.status(403).json({ 
+            message: 'Access denied', 
+            success: false 
+        });
+    }
+});
+
+//*----------------------------------------------------------putmethods------------------------------------------------>
+
+//^edit robot name and image
 router.put('/name-image-update/:teamNum', upload.single('RobotImage'), async (req, res) => {
-    const teamNum = req.params.teamNum;
-    const updateData = {};
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+        const teamNum = req.params.teamNum;
+        const updateData = {};
 
-    // Update the RobotName if provided
-    if (req.body.robotName) {
-        updateData.RobotName = req.body.robotName;
-    }
-
-    // Update the RobotImage only if a file is uploaded
-    if (req.file) {
-        updateData.RobotImage = req.file.buffer;
-    }
-
-    try {
-        const updatedRobot = await Robot.findOneAndUpdate(
-            { TeamNum: teamNum },
-            updateData,
-            { new: true }
-        );
-
-        if (!updatedRobot) {
-            return res.status(404).json({ message: 'Robot not found' });
+        // Update the RobotName if provided
+        if (req.body.robotName) {
+            updateData.RobotName = req.body.robotName;
         }
 
-        res.status(200).json({ message: 'Robot updated successfully', robot: updatedRobot });
-    } catch (error) {
-        console.error('Error updating robot:', error);
-        res.status(500).json({ message: 'An error occurred while updating the robot' });
+        // Update the RobotImage only if a file is uploaded
+        if (req.file) {
+            updateData.RobotImage = req.file.buffer;
+        }
+
+        try {
+            const updatedRobot = await Robot.findOneAndUpdate(
+                { TeamNum: teamNum },
+                updateData,
+                { new: true }
+            );
+
+            if (!updatedRobot) {
+                return res.status(404).json({ message: 'Robot not found' });
+            }
+
+            res.status(200).json({ 
+                message: 'Robot updated successfully', 
+                success: true, 
+                robot: updatedRobot 
+            });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).json({ 
+                message: 'Error occured while updating', 
+                success: false 
+            });
+        }
+    } else {
+        res.status(403).json({ 
+            message: 'Access denied', 
+            success: false 
+        });
     }
 });
-//put method to update the pitscout
+
+//^edit pit scout
 router.put('/update/:teamNum', async (req, res) => {
-    const teamNum = req.params.teamNum;
-    const updateData = req.body;
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+        const teamNum = req.params.teamNum;
+        const updateData = req.body;
+        const updatedBy = req.session.user.username;
 
-    try {
-        const updatedRobot = await Robot.findOneAndUpdate(
-            { TeamNum: teamNum },
-            updateData,
-            { new: true }
-        );
+        try {
+            const updatedRobot = await Robot.findOneAndUpdate(
+                { TeamNum: teamNum },
+                {updateData,
+                lastUpdatedBy: updatedBy},
+                { new: true }
+            );
 
-        if (!updatedRobot) {
-            return res.status(404).json({ message: 'Robot not found' });
+            if (!updatedRobot) {
+                return res.status(404).json({ message: 'Robot not found' });
+            }
+            
+            res.status(200).json({ 
+                message: 'Robot updated successfully', 
+                success: true, 
+                robot: updatedRobot 
+            });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).json({ 
+                message: 'Error occured while updating', 
+                success: false 
+            });
         }
-
-        res.status(200).json({ message: 'Robot updated successfully', robot: updatedRobot });
-    } catch (error) {
-        console.error('Error updating robot:', error);
-        res.status(500).json({ message: 'An error occurred while updating the robot' });
+    } else {
+        res.status(403).json({ 
+            message: 'Access denied', 
+            success: false 
+        });
     }
 });
-//put method to update the matchs of the robot
+
+//^edit match scout
 router.put('/matchupdate/:teamNum/:matchNo', async (req, res) => {
-    const teamNum = req.params.teamNum;
-    const matchNo = req.params.matchNo;
-    const updateData = req.body;
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+        const teamNum = req.params.teamNum;
+        const matchNo = req.params.matchNo;
+        const updateData = req.body;
+        const updatedBy = req.session.user.username;
 
-    try {
-        const matchModel = MatchCollection(teamNum)
-        const updatedmatch = await matchModel.findOneAndUpdate(
-            { MatchNo: matchNo },
-            updateData,
-            { new: true }
-        );
+        try {
+            const matchModel = MatchCollection(teamNum)
+            const updatedmatch = await matchModel.findOneAndUpdate(
+                { MatchNo: matchNo },
+                {updateData,
+                lastUpdatedBy: updatedBy},
+                { new: true }
+            );
 
-        if (!updatedmatch) {
-            return res.status(404).json({ message: 'match not found' });
+            if (!updatedmatch) {
+                return res.status(404).json({ message: 'Match not found' });
+            }
+            
+            res.status(200).json({ 
+                message: 'Match updated successfully', 
+                success: true, 
+                match: updatedmatch 
+            });
+        } catch (error) {
+            console.error('Error updating match:', error);
+            res.status(500).json({ 
+                message: 'Internal server error', 
+                success: false 
+            });
         }
+    } else {
+        res.status(403).json({ 
+            message: 'Access denied', 
+            success: false 
+        });
+    }
+});
 
-        res.status(200).json({ message: 'match updated successfully', robot: updatedmatch });
-    } catch (error) {
-        console.error('Error updating match:', error);
-        res.status(500).json({ message: 'An error occurred while updating the match' });
+//^edit users
+router.put('/admin/update-user/:id', async (req, res) => {
+    if (req.session.user && req.session.user.roles === 'admin') {
+        const userId = req.params.id;
+        const updateData = req.body;
+        try {
+            const updatedUser = await Users.findOneAndUpdate(
+                { _id: userId },
+                updateData,
+                { new: true }
+            );
+            if (!updatedUser) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            res.status(200).json({ 
+                message: 'User updated successfully', 
+                success: true, 
+                user: updatedUser 
+            });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).json({ 
+                message: 'Internal server error', 
+                success: false 
+            });
+        }
+    } else {
+        res.status(403).send({ message: 'Access denied' });
     }
 });
 

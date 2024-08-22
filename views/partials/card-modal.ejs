@@ -22,7 +22,9 @@
                 <option value="11">Match 11</option>
                 <option value="12">Match 12</option>
             </select>
-            <button class="changeImage-button" id="openUModalBtn">Edit Image/Name</button>
+            <% if (user && (user.roles === 'admin' || user.roles === 'scout')) { %>
+                <button class="changeImage-button" id="openUModalBtn">Edit Image/Name</button>
+            <% } %>
         </div>
         <p class="card-title" id="modalRobotName"></p>
         <div class="update-form">
@@ -61,11 +63,13 @@
         const ImageNameUpdateBtn = document.getElementById('updatebtn');
         let currentCard = null; // To keep track of the currently open card
 
-
-        // script to open the update modal on btn pressed
-        openUpdateModalbtn.onclick = function() {
-            updateModal.style.display = "flex";
+        if(openUpdateModalbtn) {
+            // script to open the update modal on btn pressed
+            openUpdateModalbtn.onclick = function() {
+                updateModal.style.display = "flex";
+            }
         }
+        
         // Close the initial modal when close button is pressed 
         span.onclick = () => {
             modal.style.display = 'none';
@@ -79,6 +83,7 @@
                 updateModal.style.display = 'none';
             }
         };
+
 
         // All the Select elements in any modal
         const selectElements = {
@@ -115,10 +120,18 @@
                 const teamName = card.getAttribute('data-teamname');
                 const robotName = card.getAttribute('data-robotname');
                 const lastUpdated = card.getAttribute('data-lastUpdated');
+                const lastUpdatedBy = card.getAttribute('data-lastupdatedby');
 
+
+                
                 // Setting the team number attribute to save and delete button as required for put and delete query
-                saveButton.setAttribute('data-team-num', teamNum);  
-                deleteButton.setAttribute('data-team-num', teamNum);
+                if(saveButton){
+                    saveButton.setAttribute('data-team-num', teamNum);  
+                }
+                if(deleteButton) {
+                    deleteButton.setAttribute('data-team-num', teamNum);
+                }
+                scoutSelect.setAttribute('data-team-num', teamNum);
                 ImageNameUpdateBtn.setAttribute('data-team-num', teamNum);
 
                 // Setting the text content and placeholder of pit-scout modal(Fixed header for entire card and its content)
@@ -129,7 +142,7 @@
                 const lastUpdatedDate = lastUpdated ? new Date(lastUpdated) : null;
                 const formattedDate = lastUpdatedDate ? lastUpdatedDate.toLocaleDateString() : 'N/A';
                 const formattedTime = lastUpdatedDate ? lastUpdatedDate.toLocaleTimeString() : 'N/A';
-                document.getElementById('lastUpdated').textContent = `Last Updated: ${formattedDate} ${formattedTime}`;
+                document.getElementById('lastUpdated').textContent = `Last Updated by ${lastUpdatedBy} at ${formattedDate} ${formattedTime}`;
 
                 // Automatically set the corresponding value from the database for fields
                 Object.keys(inputFields).forEach(key => {
@@ -142,9 +155,11 @@
                 });
 
                 modal.style.display = 'block'; // Displays the robot modal
-                saveButton.style.display = 'none'; // Hides the save button (only comes after edit is pressed)
-                editButton.style.display = 'inline-block'; // Ensures the edit button is displayed from the start
 
+                if(saveButton && editButton){
+                    saveButton.style.display = 'none'; // Hides the save button (only comes after edit is pressed)
+                    editButton.style.display = 'inline-block'; // Ensures the edit button is displayed from the start
+                }
                 scoutSelect.value = 'pit-scout';
                 toggleSections(); // Runs the function to load content (pit-scout option is already selected)
             });
@@ -167,10 +182,14 @@
         function toggleSections() {
 
             //making sure that whenever toggle change happens all save buttons are hidden and editbutton shows
-            editButton.style.display = 'inline-block';
-            saveButton.style.display = 'none';
-            MatchEditButton.style.display = 'inline-block';
-            MatchSaveButton.style.display = 'none';
+            if(saveButton && editButton){
+                editButton.style.display = 'inline-block';
+                saveButton.style.display = 'none';
+            }
+            if(MatchSaveButton && MatchEditButton){
+                MatchEditButton.style.display = 'inline-block';
+                MatchSaveButton.style.display = 'none';
+            }
 
             Object.keys(selectElements).forEach(key => {
                 const field = selectElements[key];
@@ -191,7 +210,8 @@
                 matchScoutContent.style.display = 'none';
             } else {
                 const matchNo = scoutSelect.value;
-                const teamNum = saveButton.getAttribute('data-team-num');
+
+                const teamNum = scoutSelect.getAttribute('data-team-num');
 
                 pitScoutContent.style.display = 'none';
                 matchScoutContent.style.display = 'flex';
@@ -200,8 +220,10 @@
                     .then(response => response.json())
                     .then(data => {
 
-                        matchSaveButton.setAttribute('data-team-num', teamNum);
-                        matchSaveButton.setAttribute('data-match-num', matchNo);
+
+                        // matchSaveButton.setAttribute('data-team-num', teamNum);
+                        // matchSaveButton.setAttribute('data-match-num', matchNo);
+                        
 
                         document.getElementById('matchNo').textContent = `Match No: ${matchNo}`;
 
@@ -209,7 +231,7 @@
                         const lastUpdatedDate = data.matchData.lastUpdated ? new Date(data.matchData.lastUpdated) : null;
                         const formattedDate = lastUpdatedDate ? lastUpdatedDate.toLocaleDateString() : 'N/A';
                         const formattedTime = lastUpdatedDate ? lastUpdatedDate.toLocaleTimeString() : 'N/A';
-                        document.getElementById('lastmodified').textContent = `Last Updated: ${formattedDate} ${formattedTime}`;
+                        document.getElementById('lastmodified').textContent = `Last Updated by ${data.matchData.lastUpdatedBy} ${formattedDate} ${formattedTime}`;
 
                         // Automatically set the corresponding value from the database for fields
                         Object.keys(matchfields).forEach(key => {

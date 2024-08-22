@@ -1,23 +1,17 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="/css/robot-card.css">  
 <div class="add-error-container">
-    <button id="openModalBtn" class="addBtn">ADD ROBOT+</button>
-    <div class="error-messages">
-        <% if (messages && messages.error && messages.error.length > 0) { %>
-            <% messages.error.forEach(function(message) { %>
-                <div class="alert alert-danger">
-                    <%= message %>
-                </div>
-            <% }); %>
-        <% } %>
-    </div>
+    <% if (user && (user.roles === 'admin' || user.roles === 'scout')) { %>
+        <button id="openModalBtn" class="addBtn">ADD ROBOT+</button>
+    <% } %>
 </div>
-
+<div id="flash-data" data-flash-error="<%= messages.error || '' %>"></div>
 <section class="robots">
     <ul class="robots-ul">
         <!-- Sort the data array by team number before rendering -->
         <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
             <!-- setting attributes for each bot in their assigned card -->
-            <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>" data-climbandtrap="<%= bot.ClimbAndTrap %>" data-autostrats="<%= bot.AutoStrats %>" data-specialfeaturesandlimitations="<%= bot.SpecialfeaturesAndLimitations %>" data-lastupdated="<%= bot.lastUpdated %>">
+            <li class="robot-card" data-teamname="<%= bot.TeamName %>" data-robotname="<%= bot.RobotName %>" data-teamnum="<%= bot.TeamNum %>" data-weight="<%= bot.Weight %>" data-framesize="<%= bot.FrameSize %>" data-drivetrain="<%= bot.Drivetrain %>" data-scoreplace="<%= bot.ScorePlace %>" data-adjustableshooter="<%= bot.AdjustableShooter %>" data-climbandtrap="<%= bot.ClimbAndTrap %>" data-autostrats="<%= bot.AutoStrats %>" data-specialfeaturesandlimitations="<%= bot.SpecialfeaturesAndLimitations %>" data-lastupdated="<%= bot.lastUpdated %>" data-lastupdatedby="<%= bot.lastUpdatedBy %>">
                 <% if (bot.RobotImage && bot.RobotImage.length > 0) { %>
                     <img src="data:image/png;base64,<%= bot.RobotImage.toString('base64') %>" alt="Robot Image"> <!-- image from database -->
                 <% } else { %>
@@ -38,20 +32,32 @@
     const openModalBtn = document.getElementById("openModalBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
   
-    // Open the modal
-    openModalBtn.onclick = function() {
-        addModal.style.display = "flex";
+    if(openModalBtn) {
+        // Open the modal
+        openModalBtn.onclick = function() {
+            addModal.style.display = "flex";
+        }
+    
+        // Close the modal
+        closeModalBtn.onclick = function() {
+            addModal.style.display = "none";
+        }
+    
+        // Close the modal if the user clicks outside of the modal content
+        window.onclick = function(event) {
+        if (event.target === modal) {
+            addModal.style.display = "none";
+        }
+        }
     }
-  
-    // Close the modal
-    closeModalBtn.onclick = function() {
-        addModal.style.display = "none";
-    }
-  
-    // Close the modal if the user clicks outside of the modal content
-    window.onclick = function(event) {
-      if (event.target === modal) {
-        addModal.style.display = "none";
-      }
+
+    const flashData = document.getElementById('flash-data').dataset.flashError;
+
+    if (flashData) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: flashData
+        });
     }
 </script>

@@ -43,17 +43,34 @@
                     body: formData
                 });
 
+                const result = await response.json();
+
                 if (response.ok) {
-                    alert('Robot updated successfully');
-                    updateModal.style.display = 'none';
-                    location.reload(); // Refresh the page
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: result.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        location.reload()
                 } else {
                     const data = await response.json();
-                    alert(data.message || 'Failed to update robot');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message,
+                        confirmButtonText: 'OK'
+                    });
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while updating the robot');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while updating.',
+                    confirmButtonText: 'OK'
+                });
             }
         });
 </script>

@@ -1,0 +1,277 @@
+<link rel="stylesheet" href="/css/admin-portal.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div class="admin-container">
+    <h1>Manage users</h1>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Password</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach(user => {  %>
+                <tr>
+                    <td><input type="text" id="username-<%= user._id %>" disabled value="<%= user.username %>"></td>
+                    <td>
+                        <select id="roles-select-<%= user._id %>" disabled>
+                            <option value="<%= user.roles %>" selected disabled><%= user.roles %></option>
+                            <option value="admin" >Admin</option>
+                            <option value="scout" >Scout</option>
+                        </select>
+                    </td>
+                    <td><input type="text" id="password-<%= user._id %>" disabled value="<%= user.password %>"></td>
+                    <td>
+                        <button class="user-edit-btn" data-id="<%= user._id %>">Edit</button>
+                        <button class="user-save-btn" style="display:none;" data-id="<%= user._id %>">Save</button>
+                        <% if (user._id.toString() !== loggedInUserId) { %>
+                            <button class="user-delete-btn" data-id="<%= user._id %>">Delete</button>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+            <!-- Add New User Row -->
+            <tr class="add-user-row">
+                <td><input id="new-user-name" type="text" placeholder="Username" required/></td>
+                <td>
+                    <select id="new-user-role" required>
+                        <option value="" selected disabled>Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="scout">Scout</option>
+                    </select>
+                </td>
+                <td><input id="new-user-password" type="text" placeholder="Password" required/></td>
+                <td>
+                    <button id="add-user-btn" class="add-user-btn">Add User</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        //edit user
+        document.querySelectorAll('.user-edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const uid = button.getAttribute('data-id');
+                const userFields = {
+                    username: document.getElementById(`username-${uid}`),
+                    roles: document.getElementById(`roles-select-${uid}`),
+                    password: document.getElementById(`password-${uid}`)
+                };
+
+                // Enable fields for editing
+                Object.keys(userFields).forEach(key => {
+                    if (userFields[key]) {
+                        userFields[key].disabled = false;
+                    }
+                });
+
+                // Show save button and hide edit button
+                button.style.display = 'none';
+                button.parentElement.querySelector('.user-save-btn').style.display = 'inline-block';
+            });
+        });
+        document.querySelectorAll('.user-save-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const id = button.getAttribute('data-id');
+                const userFields = {
+                    username: document.getElementById(`username-${id}`),
+                    roles: document.getElementById(`roles-select-${id}`),
+                    password: document.getElementById(`password-${id}`)
+                };
+
+                const updatedData = {};
+
+                Object.keys(userFields).forEach(key => {
+                    updatedData[key] = userFields[key].value;
+                });
+
+                try {
+                    const response = await fetch(`/admin/update-user/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // Show success alert
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: result.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } else {
+                        // Show error alert
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+
+                    // Disable fields after saving
+                    Object.keys(userFields).forEach(key => {
+                        if (userFields[key]) {
+                            userFields[key].disabled = true;
+                        }
+                    });
+
+                    // Show edit button and hide save button
+                    button.style.display = 'none';
+                    button.parentElement.querySelector('.user-edit-btn').style.display = 'inline-block';
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        });
+
+        //add user
+        document.getElementById('add-user-btn').addEventListener('click', async function() {
+            const addUserField = {
+                username: document.getElementById('new-user-name').value,
+                roles: document.getElementById('new-user-role').value,
+                password: document.getElementById('new-user-password').value
+            };
+
+            for (const key in addUserField) {
+                if (addUserField[key] === '') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Please fill out all the fields to add a user',
+                        confirmButtonText: 'OK'
+                    });
+                    return; // Exit the function if validation fails
+                }
+            }
+
+            const updatedData = {};
+
+            Object.keys(addUserField).forEach(key => {
+                updatedData[key] = addUserField[key];
+            });
+
+            try {
+                const response = await fetch('/admin/add-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                    
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                   // Show success alert
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: result.message,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        location.reload(); // Reload the page after successful addition
+                    });
+                } else {
+                    // Show error alert
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while adding.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    
+        //delete user
+        document.querySelectorAll('.user-delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const id = button.getAttribute('data-id');
+                        try {
+                            const response = await fetch(`/admin/delete-user/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                            });
+
+                            const result = await response.json();
+
+                            if (response.ok) {
+                                // Show success alert
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: result.message,
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => {
+                                    location.reload(); // Optionally reload the page to reflect the deletion
+                                });
+                            } else {
+                                // Show error alert
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: result.message,
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while deleting.',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    }
+                });
+
+            });
+        });
+    });
+
+</script>

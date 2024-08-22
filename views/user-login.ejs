@@ -1,0 +1,45 @@
+<!-- views/adminlogin.ejs -->
+<div class="login-container">
+  <div class="login-card">
+      <div class="logo">
+          <img src="../img/ScoutIt-logo.png" alt="Logo">
+      </div>
+      <label for="adminlogin">Scout Login</label>
+      <div id="form-container">
+          <!-- Sign In Form -->
+          <div id="signin-form">
+              <form action="/login" method="POST">
+                  <div>
+                      <label for="signin-username">Username</label>
+                      <input type="text" id="signin-username" name="username" required>
+                  </div>
+                  <div>
+                      <label for="signin-password">Password</label>
+                      <input type="password" id="signin-password" name="password" required>
+                  </div>
+                  <button type="submit">Sign In</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Inject flash messages for use in the script -->
+<div id="flash-data" data-flash-error="<%= messages.error || '' %>"></div>
+
+<!-- Include SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+// Show error flash message with SweetAlert
+const flashData = document.getElementById('flash-data').dataset.flashError;
+
+if (flashData) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: flashData
+    });
+}
+</script>

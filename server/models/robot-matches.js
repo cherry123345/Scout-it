@@ -38,6 +38,9 @@ const createMatchCollection = (teamNum) => {
         lastUpdated: {
             type: Date,
             default: Date.now,
+        },
+        lastUpdatedBy: {
+            type: String
         }
     });
 

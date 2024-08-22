@@ -29,6 +29,10 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    next();
+});
 
 app.use('/', require('./server/routes/main'));
 

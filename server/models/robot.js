@@ -51,6 +51,9 @@ const RobotSchema = new mongoose.Schema({
     lastUpdated: {
         type: Date,
         default: Date.now,
+    },
+    lastUpdatedBy: {
+        type: String
     }
 }); 
 

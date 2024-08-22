@@ -1,3 +1,4 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <p class="card-title" id="matchNo"></p>
 <label for="SpeakerNotes">SpeakerNotes:</label>
 <input type="number" id="speakerNotes" readonly placeholder="">
@@ -28,8 +29,10 @@
 <label for="AdditionalNotes">Additional Notes:</label>
 <input type="text" id="additionalnotes" readonly placeholder="">
 <div class="modal-btn">
-    <button id="matchEditButton" class="edit-button">Edit</button>
-    <button id="matchSaveButton" class="save-button" style="display:none;">Save</button>
+    <% if (user && (user.roles === 'admin' || user.roles === 'scout')) { %>
+        <button id="matchEditButton" class="edit-button">Edit</button>
+        <button id="matchSaveButton" class="save-button" style="display:none;">Save</button>
+    <% } %>
 </div>  
 <p id="lastmodified" class="last-updated"></p>
 
@@ -38,6 +41,8 @@
         const editButton = document.getElementById('matchEditButton');
         const saveButton = document.getElementById('matchSaveButton');
         const modal = document.getElementById('robotModal');
+        const scoutSelect = document.getElementById('scout-select');
+        
 
         const matchfields = {
             SpeakerNotes: document.getElementById('speakerNotes'),
@@ -50,45 +55,82 @@
             AdditionalNotes: document.getElementById('additionalnotes')
         };
 
-        editButton.addEventListener('click', () => {
-            Object.keys(matchfields).forEach(key => {
-                matchfields[key].disabled = false; // Make fields editable
-                matchfields[key].readOnly = false;
+        if(editButton) {
+            editButton.addEventListener('click', () => {
+                Object.keys(matchfields).forEach(key => {
+                    matchfields[key].disabled = false; // Make fields editable
+                    matchfields[key].readOnly = false;
+                });
+                editButton.style.display = 'none';
+                saveButton.style.display = 'inline-block';
             });
-            editButton.style.display = 'none';
-            saveButton.style.display = 'inline-block';
-        });
+        }
 
-        saveButton.addEventListener('click', async () => {
-            const teamNum = saveButton.getAttribute('data-team-num');
-            const matchNo = saveButton.getAttribute('data-match-num');;
-            const updatedData = {};
+        if(saveButton) {
+            saveButton.addEventListener('click', async () => {
+                const matchNo = scoutSelect.value;
+                const teamNum = scoutSelect.getAttribute('data-team-num');
+                const updatedData = {};
 
-            Object.keys(matchfields).forEach(key => {
-                updatedData[key] = matchfields[key].value;
-            });
-
-            try {
-                const response = await fetch(`/matchupdate/${teamNum}/${matchNo}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData)
+                Object.keys(matchfields).forEach(key => {
+                    updatedData[key] = matchfields[key].value;
                 });
 
-                if (response.ok) {
-                    alert('match updated successfully');
-                    modal.style.display = 'none';
-                    location.reload(); // Refresh the page
-                } else {
-                    const data = await response.json();
-                    alert(data.message || 'Failed to update match');
+                try {
+                    const response = await fetch(`/matchupdate/${teamNum}/${matchNo}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: result.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        Object.keys(matchfields).forEach(key => {
+                            matchfields[key].disabled = true; // Make fields editable
+                            matchfields[key].readOnly = true;
+                        });
+                        editButton.style.display = 'inline-block';
+                        saveButton.style.display = 'none';
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message,
+                            confirmButtonText: 'OK'
+                        });
+                        Object.keys(matchfields).forEach(key => {
+                            matchfields[key].disabled = true; // Make fields editable
+                            matchfields[key].readOnly = true;
+                        });
+                        editButton.style.display = 'inline-block';
+                        saveButton.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating.',
+                        confirmButtonText: 'OK'
+                    });
+                    Object.keys(matchfields).forEach(key => {
+                            matchfields[key].disabled = true; // Make fields editable
+                            matchfields[key].readOnly = true;
+                        });
+                    editButton.style.display = 'inline-block';
+                    saveButton.style.display = 'none';
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while updating the match');
-            }
-        });
+            });
+        }
     });
 </script>

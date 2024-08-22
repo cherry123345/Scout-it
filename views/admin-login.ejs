@@ -1,0 +1,84 @@
+<!-- views/adminlogin.ejs -->
+<div class="login-container">
+  <div class="login-card">
+      <div class="logo">
+          <img src="../img/ScoutIt-logo.png" alt="Logo">
+      </div>
+      <label for="adminlogin">Admin Login</label>
+      <div class="button-container">
+          <button id="signin-btn" class="active" onclick="showSignIn()">Sign In</button>
+          <button id="signup-btn" onclick="showSignUp()">Sign Up</button>
+      </div>
+      <div id="form-container">
+          <!-- Sign In Form -->
+          <div id="signin-form">
+              <form action="/admin/login" method="POST">
+                  <div>
+                      <label for="signin-username">Username</label>
+                      <input type="text" id="signin-username" name="username" required>
+                  </div>
+                  <div>
+                      <label for="signin-password">Password</label>
+                      <input type="password" id="signin-password" name="password" required>
+                  </div>
+                  <button type="submit">Sign In</button>
+              </form>
+          </div>
+
+          <!-- Sign Up Form -->
+          <div id="signup-form" style="display: none;">
+              <form action="/admin/register" method="POST">
+                  <div>
+                      <label for="signup-username">Create Username</label>
+                      <input type="text" id="signup-username" name="username" required>
+                  </div>
+                  <div>
+                      <label for="signup-password">Create Password</label>
+                      <input type="password" id="signup-password" name="password" required>
+                  </div>
+                  <div>
+                      <label for="signup-password">Re-enter Password</label>
+                      <input type="password" id="re-signup-password" name="password" required>
+                  </div>
+                  <button type="submit">Sign Up</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Inject flash messages for use in the script -->
+<div id="flash-data" data-flash-error="<%= messages.error || '' %>"></div>
+
+<!-- Include SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function showSignIn() {
+    document.getElementById('signin-form').style.display = 'block';
+    document.getElementById('signup-form').style.display = 'none';
+    document.getElementById('signin-btn').classList.add('active');
+    document.getElementById('signup-btn').classList.remove('active');
+}
+
+function showSignUp() {
+    document.getElementById('signin-form').style.display = 'none';
+    document.getElementById('signup-form').style.display = 'block';
+    document.getElementById('signup-btn').classList.add('active');
+    document.getElementById('signin-btn').classList.remove('active');
+}
+
+// Show sign-in form by default
+document.addEventListener('DOMContentLoaded', showSignIn);
+
+// Show error flash message with SweetAlert
+const flashData = document.getElementById('flash-data').dataset.flashError;
+
+if (flashData) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: flashData
+    });
+}
+</script>

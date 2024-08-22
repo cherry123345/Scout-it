@@ -1,0 +1,115 @@
+/* Add these styles to your CSS file */
+
+/* Basic reset */
+body {
+    background-image: url('../img/nacirobotics.png');
+    background-attachment: fixed;
+}
+
+/* Center the login form */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 0 20px;
+}
+
+/* Card style for the form */
+.login-card {
+    background: #002e6a;
+    border-radius: 8px;
+    box-shadow: 0 6px 19px rgba(0, 0, 0, 0.2); /* Darker shadow */
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Logo styling */
+.logo {
+    margin-bottom: 20px;
+}
+
+.logo img {
+    max-width: 100px; /* Adjust size as needed */
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: white;
+    font-family: "Chakra Petch", sans-serif;
+    font-size: larger;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: large;
+}
+
+/* Button container styling */
+.button-container {
+    margin-bottom: 20px;
+}
+
+.button-container button {
+    background-color: rgb(255, 112, 17);
+    color: #fff;
+    border: none;
+    padding: 10px 50px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 5px;
+}
+
+.button-container button.active {
+    background-color: rgb(239, 212, 179);
+}
+
+.button-container button:hover {
+    background-color: rgb(239, 212, 179);
+}
+
+button {
+    background-color: rgb(255, 112, 17);
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: rgb(239, 212, 179);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .login-card {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .logo img {
+        max-width: 80px; /* Adjust logo size for smaller screens */
+    }
+}

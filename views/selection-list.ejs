@@ -1,0 +1,126 @@
+<link rel="stylesheet" href="/css/selection-list.css">
+<div class="priority-table-container">
+    <h1>Priority Table</h1>
+    <h1>(not shared and refreshing will clear it)</h1>
+    <table id="priority-table">
+        <thead>
+            <tr>
+                <th>Priority</th>
+                <th>Team Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Row template -->
+            <tr id="row-template">
+                <td>
+                    <div class="idk">
+                        <!-- Placeholder for priority number and team options -->
+                        Priority: 1
+                        <select class="team-select">
+                            <option selected disabled>Select a team</option>
+                            <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
+                                <option value="<%= bot.TeamNum %>">
+                                    <%= bot.TeamNum %>
+                                </option>
+                            <% }) %>
+                        </select>
+                        <button class="set-priority-btn">Set</button>
+                    </div>
+                </td>
+                <td class="team-num"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="prioritybtn">
+        <button id="add-priority-btn">Add Priority</button>
+        <button id="delete-priority-btn">Delete Last Priority</button>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    let nextPriority = parseInt(localStorage.getItem('nextPriority')) || 2;
+
+    function loadRows() {
+        const tbody = document.querySelector('#priority-table tbody');
+        const rows = JSON.parse(localStorage.getItem('rows')) || [];
+        rows.forEach(row => {
+            const newRow = document.getElementById('row-template').cloneNode(true);
+            newRow.removeAttribute('id');
+            const priorityDiv = newRow.querySelector('.idk');
+            priorityDiv.innerHTML = `Priority: ${row.priority} <select class="team-select">
+                                        <option selected disabled>Select a team</option>
+                                        <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
+                                            <option value="<%= bot.TeamNum %>">
+                                                <%= bot.TeamNum %>
+                                            </option>
+                                        <% }) %>
+                                    </select>
+                                    <button class="set-priority-btn">Set</button>`;
+            tbody.appendChild(newRow);
+        });
+    }
+
+    loadRows();
+
+    document.querySelector('#priority-table').addEventListener('click', function(e) {
+        if (e.target.classList.contains('set-priority-btn')) {
+            const row = e.target.closest('tr');
+            const select = row.querySelector('.team-select');
+            const selectedTeam = select.value;
+
+            if (selectedTeam) {
+                const teamNumCell = row.querySelector('.team-num');
+                teamNumCell.innerHTML = `<span>${selectedTeam}</span>`;
+            }
+        }
+    });
+
+    document.getElementById('add-priority-btn').addEventListener('click', function() {
+        const tbody = document.querySelector('#priority-table tbody');
+        const newRow = document.getElementById('row-template').cloneNode(true);
+        newRow.removeAttribute('id');
+        const priorityDiv = newRow.querySelector('.idk');
+        priorityDiv.innerHTML = `Priority: ${nextPriority} <select class="team-select">
+                                    <option selected disabled>Select a team</option>
+                                    <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
+                                        <option value="<%= bot.TeamNum %>">
+                                            <%= bot.TeamNum %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                                <button class="set-priority-btn">Set</button>`;
+        tbody.appendChild(newRow);
+
+        // Save new row data
+        const rows = JSON.parse(localStorage.getItem('rows')) || [];
+        rows.push({ priority: nextPriority });
+        localStorage.setItem('rows', JSON.stringify(rows));
+        localStorage.setItem('nextPriority', nextPriority + 1);
+
+        nextPriority++;
+    });
+
+    document.getElementById('delete-priority-btn').addEventListener('click', function() {
+        const tbody = document.querySelector('#priority-table tbody');
+        const rows = JSON.parse(localStorage.getItem('rows')) || [];
+        if (rows.length > 0) {
+            // Remove the last row from the DOM
+            tbody.removeChild(tbody.lastChild);
+            // Remove the last row from localStorage
+            rows.pop();
+            localStorage.setItem('rows', JSON.stringify(rows));
+            // Update nextPriority if necessary
+            if (rows.length > 0) {
+                nextPriority = rows[rows.length - 1].priority + 1;
+                localStorage.setItem('nextPriority', nextPriority);
+            } else {
+                nextPriority = 2;
+                localStorage.setItem('nextPriority', nextPriority);
+            }
+        }
+    });
+});
+
+</script>
