@@ -1,25 +1,27 @@
-.analysis-select{
+.analysis-select {
     display: flex;
-    width: 300px;
+    width: 200px;
     padding: 5px;
     margin-left: 20px;
     margin-top: 5px;
     box-shadow: 0 0px 10px rgb(255, 112, 17);
-    
 }
 
-.analysis-title{
+.analysis-title {
     display: flex;
     gap: 10px;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.robot-heading{
+.robot-heading {
     display: flex;
     text-align: center;
     padding: 5px;
     margin-top: 5px;
     font-family: "Chakra Petch", sans-serif;
     text-transform: capitalize;
+    flex-grow: 1; /* Allows the heading to take up available space */
 }
 
 .analysis-content {
@@ -90,4 +92,15 @@ td input {
 td input:focus {
     outline: none;
     background-color: #f9f9f9;
+}
+
+#team-search {
+    width: 200px;
+    padding: 5px;
+    margin-right: 20px;
+    margin-top: 5px;
+    box-shadow: 0 0px 10px rgb(255, 112, 17);
+    border: none;
+    border-radius: 5px;
+    font-family: "Share Tech Mono", monospace;
 }
