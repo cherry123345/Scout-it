@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const MatchCollection = require('../models/robot-matches');
 
+const MatchCollection = require('../models/robot-matches');
 const Robot = require('../models/robot');
 const Users = require('../models/users');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const Priority = require('../models/priority-list');
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -112,7 +113,15 @@ router.get('/selection-list', async (req, res) => {
     };
     try{
         const data = await Robot.find();
-        res.render('selection-list', {locals, data, messages});
+        const priorities = await Priority.find().sort('priorityNum');
+
+        // Get all team numbers that are already assigned
+        const assignedTeams = priorities.map(priority => priority.teamNum).filter(team => team !== null);
+
+        // Filter out the assigned teams from the team list
+        const availableTeams = data.filter(bot => !assignedTeams.includes(bot.TeamNum));
+
+        res.render('selection-list', {locals, data, messages, priorities, availableTeams });
     } catch (error) {
         console.log(error);
         res.status(500).send('Internal Server Error'); 
@@ -334,6 +343,22 @@ router.post('/admin/add-user',  async (req, res) => {
     }
 });
 
+//^add-priority
+router.post('/add-priorities', async (req, res) => {
+    const { priorityNum } = req.body;
+
+    const priority = new Priority({ priorityNum: priorityNum, teamNum: '' });
+
+    try {
+        // Save the new Priority document to the database
+        await priority.save();
+        res.status(200).json({ success: true, message: 'Priority added successfully.' });
+    } catch (e) {
+        console.error('Error saving priority:', e);
+        res.status(500).json({ success: false, message: 'Failed to add priority.' });
+        }
+});
+
 //*----------------------------------------------------------deletemethods------------------------------------------------>
 
 //^delete-robot
@@ -384,6 +409,12 @@ router.delete('/admin/delete-user/:id', async (req, res) => {
             success: false 
         });
     }
+});
+
+//^delete-priority
+router.delete('/delete-priority/:id', async (req, res) => {
+    await Priority.findByIdAndDelete(req.params.id);
+    res.status(204).end();
 });
 
 //*----------------------------------------------------------putmethods------------------------------------------------>
@@ -544,6 +575,18 @@ router.put('/admin/update-user/:id', async (req, res) => {
         }
     } else {
         res.status(403).send({ message: 'Access denied' });
+    }
+});
+
+//^edit selection list
+router.put('/update-priority/:id', async (req, res) => {
+    try {
+        const { teamNum } = req.body;
+        await Priority.findByIdAndUpdate(req.params.id, { teamNum });
+        res.status(200).json({ message: 'Priority updated successfully' });
+    } catch (error) {
+        console.error('Error updating priority:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 });
 

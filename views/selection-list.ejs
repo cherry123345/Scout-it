@@ -1,34 +1,28 @@
 <link rel="stylesheet" href="/css/selection-list.css">
 <div class="priority-table-container">
     <h1>Priority Table</h1>
-    <h1>(not shared and refreshing will clear it)</h1>
     <table id="priority-table">
         <thead>
             <tr>
                 <th>Priority</th>
-                <th>Team Name</th>
+                <th>Robot</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Row template -->
-            <tr id="row-template">
-                <td>
-                    <div class="idk">
-                        <!-- Placeholder for priority number and team options -->
-                        Priority: 1
-                        <select class="team-select">
-                            <option selected disabled>Select a team</option>
-                            <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
-                                <option value="<%= bot.TeamNum %>">
-                                    <%= bot.TeamNum %>
-                                </option>
-                            <% }) %>
-                        </select>
-                        <button class="set-priority-btn">Set</button>
-                    </div>
-                </td>
-                <td class="team-num"></td>
-            </tr>
+        <tbody data-row-count="<%= priorities.length %>"> 
+            <% priorities.forEach(priority => { %>
+                <tr data-id="<%= priority._id %>">
+                    <td class="priority-num"><%= priority.priorityNum %></td>
+                    <td class="team-dropzone">
+                        <div class="team-dropzone-content">
+                            <% if (priority.teamNum) { %>
+                                <div class="team-block" draggable="true" data-team="<%= priority.teamNum %>">
+                                    <%= priority.teamNum %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </td>
+                </tr>
+            <% }) %>
         </tbody>
     </table>
     <div class="prioritybtn">
@@ -37,90 +31,238 @@
     </div>
 </div>
 
+<div class="team-container">
+    <h2>Teams</h2>
+    <div id="team-blocks">
+        <% availableTeams.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
+            <div class="team-block" draggable="true" data-team="<%= bot.TeamNum %>">
+                <%= bot.TeamNum %>
+            </div>
+        <% }) %>
+    </div>
+</div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    let nextPriority = parseInt(localStorage.getItem('nextPriority')) || 2;
+   document.addEventListener('DOMContentLoaded', function() {
 
-    function loadRows() {
-        const tbody = document.querySelector('#priority-table tbody');
-        const rows = JSON.parse(localStorage.getItem('rows')) || [];
-        rows.forEach(row => {
-            const newRow = document.getElementById('row-template').cloneNode(true);
-            newRow.removeAttribute('id');
-            const priorityDiv = newRow.querySelector('.idk');
-            priorityDiv.innerHTML = `Priority: ${row.priority} <select class="team-select">
-                                        <option selected disabled>Select a team</option>
-                                        <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
-                                            <option value="<%= bot.TeamNum %>">
-                                                <%= bot.TeamNum %>
-                                            </option>
-                                        <% }) %>
-                                    </select>
-                                    <button class="set-priority-btn">Set</button>`;
-            tbody.appendChild(newRow);
+function initializeDragEvents() {
+    const teamBlocks = document.querySelectorAll('.team-block');
+    teamBlocks.forEach(block => {
+        block.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/plain', e.target.getAttribute('data-team'));
+            e.dataTransfer.setData('blockId', e.target.getAttribute('data-team')); // Use team number as ID
+            e.target.style.opacity = '0.4'; // Optional: visually indicate dragging
         });
-    }
+        block.addEventListener('dragend', function(e) {
+            e.target.style.opacity = ''; // Reset the opacity
+        });
+    });
+}
+// Initialize drag events for existing team blocks
+initializeDragEvents();
 
-    loadRows();
+// Handle team blocks
+const teamBlocksContainer = document.getElementById('team-blocks');
+const dropzones = document.querySelectorAll('.team-dropzone');
 
-    document.querySelector('#priority-table').addEventListener('click', function(e) {
-        if (e.target.classList.contains('set-priority-btn')) {
-            const row = e.target.closest('tr');
-            const select = row.querySelector('.team-select');
-            const selectedTeam = select.value;
+dropzones.forEach(zone => {
+    zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        zone.classList.add('over');
+    });
 
-            if (selectedTeam) {
-                const teamNumCell = row.querySelector('.team-num');
-                teamNumCell.innerHTML = `<span>${selectedTeam}</span>`;
+    zone.addEventListener('dragleave', function() {
+        zone.classList.remove('over');
+    });
+
+    zone.addEventListener('drop', async function(e) {
+        e.preventDefault();
+        zone.classList.remove('over');
+
+        const teamNum = e.dataTransfer.getData('text/plain');
+        const blockId = e.dataTransfer.getData('blockId');
+        const draggedBlock = document.querySelector(`.team-block[data-team='${blockId}']`);
+
+        if (draggedBlock) {
+            const teamDropzoneContent = zone.querySelector('.team-dropzone-content');
+            const targetPriorityId = zone.closest('tr').getAttribute('data-id');
+            const sourceRow = draggedBlock.closest('tr');
+            const sourcePriorityId = sourceRow ? sourceRow.getAttribute('data-id') : null;
+
+            // Check if the target dropzone has an existing block
+            const existingBlock = teamDropzoneContent.querySelector('.team-block');
+            if (existingBlock) {
+                const existingTeamNum = existingBlock.getAttribute('data-team');
+
+                // Move the existing block back to the source dropzone (if any)
+                if (sourceRow) {
+                    const sourceDropzoneContent = sourceRow.querySelector('.team-dropzone-content');
+                    sourceDropzoneContent.innerHTML = ''; // Clear the source dropzone
+                    sourceDropzoneContent.appendChild(existingBlock); // Move the block to the source dropzone
+                } else {
+                    // If the sourceRow is not defined, the block was dragged from the team list
+                    teamBlocksContainer.appendChild(existingBlock);
+                }
+
+                // Update the database to swap the team numbers between the source and target dropzones
+                const response = await fetch(`/update-priority/${sourcePriorityId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ teamNum: existingTeamNum })
+                });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to add priority.');
+                }
+            } else if (sourceRow) {
+                // If there's no existing block in the target dropzone, clear the source dropzone's teamNum in the database
+                const response = await fetch(`/update-priority/${sourcePriorityId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ teamNum: null })
+                });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to add priority.');
+                }
             }
-        }
-    });
 
-    document.getElementById('add-priority-btn').addEventListener('click', function() {
-        const tbody = document.querySelector('#priority-table tbody');
-        const newRow = document.getElementById('row-template').cloneNode(true);
-        newRow.removeAttribute('id');
-        const priorityDiv = newRow.querySelector('.idk');
-        priorityDiv.innerHTML = `Priority: ${nextPriority} <select class="team-select">
-                                    <option selected disabled>Select a team</option>
-                                    <% data.sort((a, b) => a.TeamNum - b.TeamNum).forEach(bot => { %>
-                                        <option value="<%= bot.TeamNum %>">
-                                            <%= bot.TeamNum %>
-                                        </option>
-                                    <% }) %>
-                                </select>
-                                <button class="set-priority-btn">Set</button>`;
-        tbody.appendChild(newRow);
+            // Move the dragged block to the target dropzone
+            teamDropzoneContent.innerHTML = ''; // Clear any existing content in the dropzone
+            teamDropzoneContent.appendChild(draggedBlock);
+            initializeDragEvents();
 
-        // Save new row data
-        const rows = JSON.parse(localStorage.getItem('rows')) || [];
-        rows.push({ priority: nextPriority });
-        localStorage.setItem('rows', JSON.stringify(rows));
-        localStorage.setItem('nextPriority', nextPriority + 1);
-
-        nextPriority++;
-    });
-
-    document.getElementById('delete-priority-btn').addEventListener('click', function() {
-        const tbody = document.querySelector('#priority-table tbody');
-        const rows = JSON.parse(localStorage.getItem('rows')) || [];
-        if (rows.length > 0) {
-            // Remove the last row from the DOM
-            tbody.removeChild(tbody.lastChild);
-            // Remove the last row from localStorage
-            rows.pop();
-            localStorage.setItem('rows', JSON.stringify(rows));
-            // Update nextPriority if necessary
-            if (rows.length > 0) {
-                nextPriority = rows[rows.length - 1].priority + 1;
-                localStorage.setItem('nextPriority', nextPriority);
+            // Update the database to assign the dragged block's teamNum to the target dropzone
+            const response = await fetch(`/update-priority/${targetPriorityId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ teamNum })
+            });
+            if (response.ok) {
+                location.reload();
             } else {
-                nextPriority = 2;
-                localStorage.setItem('nextPriority', nextPriority);
+                console.error('Failed to add priority.');
             }
         }
     });
 });
+
+// Handle dropping from dropzone back to the team list
+teamBlocksContainer.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    teamBlocksContainer.classList.add('over');
+});
+
+teamBlocksContainer.addEventListener('dragleave', function() {
+    teamBlocksContainer.classList.remove('over');
+});
+
+teamBlocksContainer.addEventListener('drop', async function(e) {
+    e.preventDefault();
+    teamBlocksContainer.classList.remove('over');
+
+    const teamNum = e.dataTransfer.getData('text/plain');
+    const blockId = e.dataTransfer.getData('blockId');
+    const draggedBlock = document.querySelector(`.team-block[data-team='${blockId}']`);
+
+    if (draggedBlock) {
+        const newBlock = document.createElement('div');
+        newBlock.className = 'team-block';
+        newBlock.textContent = teamNum;
+        newBlock.setAttribute('data-team', teamNum);
+        newBlock.draggable = true;
+
+        teamBlocksContainer.appendChild(newBlock);
+        initializeDragEvents();
+
+        // Check if the dragged block was originally in a drop zone
+        const parentRow = draggedBlock.closest('tr');
+        if (parentRow) {
+            const priorityId = parentRow.getAttribute('data-id');
+
+            // Update the priority to remove the team number
+            const response = await fetch(`/update-priority/${priorityId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ teamNum: null })
+            });
+            if (response.ok) {
+                location.reload();
+            } else {
+                console.error('Failed to add priority.');
+            }
+        }
+        draggedBlock.remove();
+    }
+});
+
+document.getElementById('add-priority-btn').addEventListener('click', async function() {
+    try {
+        const tbody = document.querySelector('tbody');
+        const rowCount = tbody ? parseInt(tbody.getAttribute('data-row-count'), 10) : 0;
+        const newPriorityNum = rowCount + 1;
+        const updatedData = {
+            priorityNum: newPriorityNum
+        };
+        const response = await fetch('/add-priorities', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedData)
+        });
+        if (response.ok) {
+            location.reload();
+        } else {
+            console.error('Failed to add priority.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while adding.',
+            confirmButtonText: 'OK'
+        });
+    }
+});
+
+document.getElementById('delete-priority-btn').addEventListener('click', async function() {
+    const tbody = document.querySelector('#priority-table tbody');
+    if (tbody.children.length > 0) {
+        const lastRow = tbody.lastElementChild;
+        const priorityId = lastRow.getAttribute('data-id');
+
+        try {
+            const response = await fetch(`/delete-priority/${priorityId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                tbody.removeChild(lastRow);
+                location.reload();
+            } else {
+                console.error('Failed to delete priority.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+});
+});
+
 
 </script>

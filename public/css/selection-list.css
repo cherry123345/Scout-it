@@ -1,14 +1,16 @@
 
 
 .priority-table-container {
-    max-width: 800px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
 h1 {
     text-align: center;
     color: #333;
     margin-bottom: 20px;
+    font-family: "Chakra Petch", sans-serif;
 }
 
 /* Table styling */
@@ -19,6 +21,18 @@ table {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+#priority-table th:nth-child(1),
+#priority-table td.priority-num {
+    width: 15%; /* The Priority column takes up 15% of the width */
+    text-align: center;
+}
+
+#priority-table th:nth-child(2){
+    width: 85%; /* The Robot column takes up the remaining 85% of the width */
+    text-align: left;
+}
+
+
 th, td {
     border: 1px solid #ddd;
     padding: 12px;
@@ -26,20 +40,9 @@ th, td {
 }
 
 th {
-    background-color: #3f87a6;
+    background-color: rgb(255, 112, 17);
     color: white;
     font-weight: bold;
-}
-
-.set-priority-btn{
-    display: block;
-    padding: 5px 5px;
-    background-color: #3f87a6;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
 }
 
 select {
@@ -56,7 +59,7 @@ select {
     display: block;
     margin: 20px auto;
     padding: 10px 20px;
-    background-color: #3f87a6;
+    background-color: rgb(255, 112, 17);
     color: white;
     border: none;
     border-radius: 4px;
@@ -65,7 +68,7 @@ select {
 }
 
 #add-priority-btn:hover {
-    background-color: #2e6b8c;
+    background-color: rgb(239, 212, 179);
 }
 
 .prioritybtn{
@@ -78,7 +81,7 @@ select {
     display: block;
     margin: 20px auto;
     padding: 10px 20px;
-    background-color: #3f87a6;
+    background-color: rgb(255, 112, 17);
     color: white;
     border: none;
     border-radius: 4px;
@@ -87,7 +90,7 @@ select {
 }
 
 #delete-priority-btn:hover {
-    background-color: #2e6b8c;
+    background-color: rgb(239, 212, 179);
 }
 
 
@@ -105,4 +108,43 @@ select {
     #delete-priority-btn {
         width: 100%;
     }
+}
+
+.team-container {
+    margin-top: 20px;
+    border: #000;
+    border-style: dotted;
+    font-family: "Chakra Petch", sans-serif;
+}
+
+.team-block {
+    background-color: rgb(239, 212, 179);
+    padding: 5px;
+    margin: 2px;
+    border: 1px solid #ccc;
+    cursor: grab;
+    display: inline-block;
+    font-family: "Chakra Petch", sans-serif;
+    border-radius: 5px;
+}
+
+.team-dropzone {
+    border: 2px dashed #ccc;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    border: 1px dashed #ccc;
+    padding: 10px;
+    height: 20px; /* Fixed height to prevent expansion */
+    width: 100%; /* Ensure it takes up full width of the column */
+    box-sizing: border-box;
+    overflow: hidden; /* Hide overflow content to prevent expansion */
+    
+}
+
+.team-dropzone.over {
+    border-color: #000;
+    background-color: #f9f9f9;
 }
