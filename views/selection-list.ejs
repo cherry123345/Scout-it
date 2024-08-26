@@ -76,32 +76,28 @@ dropzones.forEach(zone => {
     });
 
     zone.addEventListener('drop', async function(e) {
-        e.preventDefault();
-        zone.classList.remove('over');
+    e.preventDefault();
+    zone.classList.remove('over');
 
-        const teamNum = e.dataTransfer.getData('text/plain');
-        const draggedBlock = document.querySelector(`.team-block[data-team='${teamNum}']`);
+    const teamNum = e.dataTransfer.getData('text/plain');
+    const draggedBlock = document.querySelector(`.team-block[data-team='${teamNum}']`);
 
-        if (draggedBlock) {
-            const teamDropzoneContent = zone.querySelector('.team-dropzone-content');
-            const targetPriorityId = zone.closest('tr').getAttribute('data-id');
-            const sourceRow = draggedBlock.closest('tr');
-            const sourcePriorityId = sourceRow ? sourceRow.getAttribute('data-id') : null;
+    if (draggedBlock) {
+        const teamDropzoneContent = zone.querySelector('.team-dropzone-content');
+        const targetPriorityId = zone.closest('tr').getAttribute('data-id');
+        const sourceRow = draggedBlock.closest('tr');
+        const sourcePriorityId = sourceRow ? sourceRow.getAttribute('data-id') : null;
 
-            // Check if the target dropzone has an existing block
-            const existingBlock = teamDropzoneContent.querySelector('.team-block');
-            if (existingBlock) {
-                const existingTeamNum = existingBlock.getAttribute('data-team');
+        // Check if the target dropzone has an existing block
+        const existingBlock = teamDropzoneContent.querySelector('.team-block');
+        if (existingBlock) {
+            const existingTeamNum = existingBlock.getAttribute('data-team');
 
-                // Move the existing block back to the source dropzone (if any)
-                if (sourceRow) {
-                    const sourceDropzoneContent = sourceRow.querySelector('.team-dropzone-content');
-                    sourceDropzoneContent.innerHTML = ''; // Clear the source dropzone
-                    sourceDropzoneContent.appendChild(existingBlock); // Move the block to the source dropzone
-                } else {
-                    // If the sourceRow is not defined, the block was dragged from the team list
-                    teamBlocksContainer.appendChild(existingBlock);
-                }
+            // Move the existing block back to the team list or source dropzone
+            if (sourceRow) {
+                const sourceDropzoneContent = sourceRow.querySelector('.team-dropzone-content');
+                sourceDropzoneContent.innerHTML = ''; // Clear the source dropzone
+                sourceDropzoneContent.appendChild(existingBlock); // Move the block to the source dropzone
 
                 // Update the database to swap the team numbers between the source and target dropzones
                 const response = await fetch(`/update-priority/${sourcePriorityId}`, {
@@ -115,39 +111,31 @@ dropzones.forEach(zone => {
                     console.error('Failed to update priority.');
                     return;
                 }
-            } else if (sourceRow) {
-                // If there's no existing block in the target dropzone, clear the source dropzone's teamNum in the database
-                const response = await fetch(`/update-priority/${sourcePriorityId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ teamNum: null })
-                });
-                if (!response.ok) {
-                    console.error('Failed to update priority.');
-                    return;
-                }
-            }
-
-            // Move the dragged block to the target dropzone
-            teamDropzoneContent.innerHTML = ''; // Clear any existing content in the dropzone
-            teamDropzoneContent.appendChild(draggedBlock);
-            initializeDragEvents();
-
-            // Update the database to assign the dragged block's teamNum to the target dropzone
-            const response = await fetch(`/update-priority/${targetPriorityId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ teamNum })
-            });
-            if (!response.ok) {
-                console.error('Failed to update priority.');
+            } else {
+                // If the sourceRow is not defined, the block was dragged from the team list
+                teamBlocksContainer.appendChild(existingBlock);
             }
         }
-    });
+
+        // Move the dragged block to the target dropzone
+        teamDropzoneContent.innerHTML = ''; // Clear any existing content in the dropzone
+        teamDropzoneContent.appendChild(draggedBlock);
+        initializeDragEvents();
+
+        // Update the database to assign the dragged block's teamNum to the target dropzone
+        const response = await fetch(`/update-priority/${targetPriorityId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ teamNum })
+        });
+        if (!response.ok) {
+            console.error('Failed to update priority.');
+        }
+    }
+});
+
 });
 
 // Handle dropping from dropzone back to the team list
