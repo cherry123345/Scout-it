@@ -9,7 +9,9 @@
         <ul>
             <li><a href="/" class="">HOME</a></li>
             <li><a href="/analysis" class="">ANALYSIS</a></li>
-            <li><a href="/selection-list" class="">SELECTION-LIST</a></li>
+            <% if (user && user.roles === 'admin' || user && user.roles === 'scoutlead' ) { %>
+                <li><a href="/selection-list" class="">SELECTION-LIST</a></li>
+            <% } %>
             <% if (user && user.roles === 'admin') { %>
                 <li><a href="/admin-portal" class="">ADMIN-PORTAL</a></li>
             <% } %>

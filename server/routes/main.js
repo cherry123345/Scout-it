@@ -105,26 +105,30 @@ router.get('/analysis/:teamNum/:matchno/:field', async (req, res) => {
 
 //^selection-list-page
 router.get('/selection-list', async (req, res) => {
-    const locals = {
-        title: "Scout-It",
-    }
-    const messages = {
-        error: req.flash('error')
-    };
-    try{
-        const data = await Robot.find();
-        const priorities = await Priority.find().sort('priorityNum');
+    if (req.session.user && (req.session.user.roles === 'scoutlead' || req.session.user.roles === 'admin')) {
+        const locals = {
+            title: "Scout-It",
+        }
+        const messages = {
+            error: req.flash('error')
+        };
+        try{
+            const data = await Robot.find();
+            const priorities = await Priority.find().sort('priorityNum');
 
-        // Get all team numbers that are already assigned
-        const assignedTeams = priorities.map(priority => priority.teamNum).filter(team => team !== null);
+            // Get all team numbers that are already assigned
+            const assignedTeams = priorities.map(priority => priority.teamNum).filter(team => team !== null);
 
-        // Filter out the assigned teams from the team list
-        const availableTeams = data.filter(bot => !assignedTeams.includes(bot.TeamNum));
+            // Filter out the assigned teams from the team list
+            const availableTeams = data.filter(bot => !assignedTeams.includes(bot.TeamNum));
 
-        res.render('selection-list', {locals, data, messages, priorities, availableTeams });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error'); 
+            res.render('selection-list', {locals, data, messages, priorities, availableTeams });
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('Internal Server Error'); 
+        }
+    } else {
+        res.status(403).send({ message: 'Access denied. Admins only.' });
     }
 });
 
@@ -199,7 +203,7 @@ router.get('/logout', (req, res) => {
 
 //^add-robots
 router.post('/add-robot', upload.single('robotImage'), async (req, res) => {
-    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout' || req.session.user.roles === 'scoutlead')) {
         const robotImage = req.file ? req.file.buffer : undefined;
 
         const newRobot = new Robot ({
@@ -299,7 +303,7 @@ router.post('/login', async (req, res) => {
         }
 
         req.session.user = user;
-        if (user.roles === 'scout') {
+        if (user.roles === 'scout' || user.roles === 'scoutlead') {
             req.session.user = user;
             req.session.loginTime = Date.now();
             req.session.cookie.maxAge = 50000000;//5 min
@@ -345,18 +349,22 @@ router.post('/admin/add-user',  async (req, res) => {
 
 //^add-priority
 router.post('/add-priorities', async (req, res) => {
-    const { priorityNum } = req.body;
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scoutlead')) {
+        const { priorityNum } = req.body;
 
-    const priority = new Priority({ priorityNum: priorityNum, teamNum: '' });
+        const priority = new Priority({ priorityNum: priorityNum, teamNum: '' });
 
-    try {
-        // Save the new Priority document to the database
-        await priority.save();
-        res.status(200).json({ success: true, message: 'Priority added successfully.' });
-    } catch (e) {
-        console.error('Error saving priority:', e);
-        res.status(500).json({ success: false, message: 'Failed to add priority.' });
-        }
+        try {
+            // Save the new Priority document to the database
+            await priority.save();
+            res.status(200).json({ success: true, message: 'Priority added successfully.' });
+        } catch (e) {
+            console.error('Error saving priority:', e);
+            res.status(500).json({ success: false, message: 'Failed to add priority.' });
+            }
+    }else {
+        res.status(403).send({ message: 'Access denied. Admins only.' });
+    }
 });
 
 //*----------------------------------------------------------deletemethods------------------------------------------------>
@@ -413,15 +421,19 @@ router.delete('/admin/delete-user/:id', async (req, res) => {
 
 //^delete-priority
 router.delete('/delete-priority/:id', async (req, res) => {
-    await Priority.findByIdAndDelete(req.params.id);
-    res.status(204).end();
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scoutlead')) {
+        await Priority.findByIdAndDelete(req.params.id);
+        res.status(204).end();
+    }else {
+        res.status(403).send({ message: 'Access denied. Admins only.' });
+    }
 });
 
 //*----------------------------------------------------------putmethods------------------------------------------------>
 
 //^edit robot name and image
 router.put('/name-image-update/:teamNum', upload.single('RobotImage'), async (req, res) => {
-    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout' || req.session.user.roles === 'scoutlead')) {
         const teamNum = req.params.teamNum;
         const updateData = {};
 
@@ -580,13 +592,20 @@ router.put('/admin/update-user/:id', async (req, res) => {
 
 //^edit selection list
 router.put('/update-priority/:id', async (req, res) => {
-    try {
-        const { teamNum } = req.body;
-        await Priority.findByIdAndUpdate(req.params.id, { teamNum });
-        res.status(200).json({ message: 'Priority updated successfully' });
-    } catch (error) {
-        console.error('Error updating priority:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+    if (req.session.user && (req.session.user.roles === 'admin' ||  req.session.user.roles === 'scoutlead')) {
+        try {
+            const { teamNum } = req.body;
+            await Priority.findByIdAndUpdate(req.params.id, { teamNum });
+            res.status(200).json({ message: 'Priority updated successfully' });
+        } catch (error) {
+            console.error('Error updating priority:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    } else {
+        res.status(403).json({ 
+            message: 'Access denied', 
+            success: false 
+        });
     }
 });
 

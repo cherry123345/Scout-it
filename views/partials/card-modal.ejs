@@ -22,7 +22,7 @@
                 <option value="11">Match 11</option>
                 <option value="12">Match 12</option>
             </select>
-            <% if (user && (user.roles === 'admin' || user.roles === 'scout')) { %>
+            <% if (user && (user.roles === 'admin' || user.roles === 'scout' || user.roles === 'scoutlead')) { %>
                 <button class="changeImage-button" id="openUModalBtn">Edit Image/Name</button>
             <% } %>
         </div>

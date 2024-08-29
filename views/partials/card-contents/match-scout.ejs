@@ -29,7 +29,7 @@
 <label for="AdditionalNotes">Additional Notes:</label>
 <input type="text" id="additionalnotes" readonly placeholder="">
 <div class="modal-btn">
-    <% if (user && (user.roles === 'admin' || user.roles === 'scout')) { %>
+    <% if (user && (user.roles === 'admin' || user.roles === 'scout' || user.roles === 'scoutlead')) { %>
         <button id="matchEditButton" class="edit-button">Edit</button>
         <button id="matchSaveButton" class="save-button" style="display:none;">Save</button>
     <% } %>

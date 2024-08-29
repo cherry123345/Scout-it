@@ -1,7 +1,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="/css/robot-card.css">  
 <div class="add-error-container">
-    <% if (user && (user.roles === 'admin' || user.roles === 'scout')) { %>
+    <% if (user && (user.roles === 'admin' || user.roles === 'scout'|| user.roles === 'scoutlead')) { %>
         <button id="openModalBtn" class="addBtn">ADD ROBOT+</button>
     <% } %>
 </div>

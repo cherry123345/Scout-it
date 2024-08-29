@@ -34,11 +34,11 @@
 <label for="modalSpecialfeaturesAndLimitations">Special Features and Limitations:</label>
 <input type="text" id="modalSpecialfeaturesAndLimitations"  readonly placeholder="">
 <div class="modal-btn">
-    <% if (user && (user.roles === 'admin' || user.roles === 'scout')) { %>
+    <% if (user && (user.roles === 'admin' || user.roles === 'scout' || user.roles === 'scoutlead')) { %>
         <button id="editButton" class="edit-button">Edit</button>
         <button id="saveButton" class="save-button" style="display:none;">Save</button>
     <% } %>
-    <% if (user && user.roles === 'admin') { %>
+    <% if (user && (user.roles === 'admin' || user.roles === 'scoutlead')) { %>
         <button id="deleteButton" class="delete-button">Delete</button>
     <% } %>
 </div>    

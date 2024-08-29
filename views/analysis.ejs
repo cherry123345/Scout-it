@@ -29,7 +29,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Match No:</th>
+                        <th>Match No: (avg)</th>
                         <th>1</th>
                         <th>2</th>
                         <th>3</th>
@@ -115,8 +115,6 @@
         fields.forEach(async (field) => {
             const row = document.createElement('tr');
             const cellName = document.createElement('td');
-            cellName.textContent = field;
-            row.appendChild(cellName);
 
             // Collect all fetch promises
             const fetchPromises = [];
@@ -132,6 +130,34 @@
 
             // Wait for all fetches to complete
             const results = await Promise.all(fetchPromises);
+
+            let totalSum = 0;
+            let count = 0;
+            let allNumbers = true;
+
+            results.forEach(result => {
+                if (!isNaN(result)) {
+                    totalSum += result;
+                    if(result != null) {
+                        count++;
+                    }
+                } else {
+                    allNumbers = false; // If any result is not a number, set this flag to false
+                }
+            });
+
+            if (allNumbers && count > 0) {
+                const average = totalSum / count;
+                const roundedAverage = average.toFixed(2);
+                cellName.textContent = `${field}: ${roundedAverage}/match `;
+                cellName.style.textAlign = 'left';
+            } else {
+                cellName.textContent = `${field}`;
+                cellName.style.textAlign = 'left';
+            }
+
+            row.appendChild(cellName);
+
 
             // Append cells to the row in correct order
             results.forEach(result => {
