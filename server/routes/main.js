@@ -371,7 +371,7 @@ router.post('/add-priorities', async (req, res) => {
 
 //^delete-robot
 router.delete('/delete/:teamNum', async (req, res) => {
-    if (req.session.user && req.session.user.roles === 'admin') {
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scoutlead')) {
         try {
             const teamNum = req.params.teamNum;
             await Robot.findOneAndDelete({ TeamNum: teamNum });
@@ -480,28 +480,32 @@ router.put('/name-image-update/:teamNum', upload.single('RobotImage'), async (re
 
 //^edit pit scout
 router.put('/update/:teamNum', async (req, res) => {
-    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout'|| req.session.user.roles === 'scoutlead')) {
         const teamNum = req.params.teamNum;
         const updateData = req.body;
         const updatedBy = req.session.user.username;
-
+        
         try {
             const updatedRobot = await Robot.findOneAndUpdate(
                 { TeamNum: teamNum },
-                {updateData,
-                lastUpdatedBy: updatedBy},
-                { new: true }
+                { 
+                    ...updateData, // Spread the updateData to update individual fields
+                    lastUpdatedBy: updatedBy 
+                },
+                { new: true } // This option returns the updated document
             );
 
             if (!updatedRobot) {
                 return res.status(404).json({ message: 'Robot not found' });
             }
             
+            console.log(updateData)
             res.status(200).json({ 
-                message: 'Robot updated successfully', 
-                success: true, 
-                robot: updatedRobot 
+            message: 'Robot updated successfully', 
+            success: true, 
+            robot: updatedRobot 
             });
+
         } catch (error) {
             console.error('Error updating user:', error);
             res.status(500).json({ 
@@ -519,7 +523,7 @@ router.put('/update/:teamNum', async (req, res) => {
 
 //^edit match scout
 router.put('/matchupdate/:teamNum/:matchNo', async (req, res) => {
-    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout')) {
+    if (req.session.user && (req.session.user.roles === 'admin' || req.session.user.roles === 'scout'|| req.session.user.roles === 'scoutlead')) {
         const teamNum = req.params.teamNum;
         const matchNo = req.params.matchNo;
         const updateData = req.body;
@@ -529,8 +533,10 @@ router.put('/matchupdate/:teamNum/:matchNo', async (req, res) => {
             const matchModel = MatchCollection(teamNum)
             const updatedmatch = await matchModel.findOneAndUpdate(
                 { MatchNo: matchNo },
-                {updateData,
-                lastUpdatedBy: updatedBy},
+                { 
+                    ...updateData, // Spread the updateData to update individual fields
+                    lastUpdatedBy: updatedBy 
+                },
                 { new: true }
             );
 
