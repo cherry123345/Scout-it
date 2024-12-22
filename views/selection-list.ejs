@@ -45,18 +45,22 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-function initializeDragEvents() {
-    const teamBlocks = document.querySelectorAll('.team-block');
-    teamBlocks.forEach(block => {
-        block.addEventListener('dragstart', function(e) {
-            e.dataTransfer.setData('text/plain', e.target.getAttribute('data-team'));
-            e.target.style.opacity = '0.4'; // Optional: visually indicate dragging
+    function initializeDragEvents() {
+        const teamBlocks = document.querySelectorAll('.team-block');
+
+        // Drag events (existing)
+        teamBlocks.forEach(block => {
+                        // Enable dragging only when drag starts
+            block.addEventListener('dragstart', function (e) {
+                e.dataTransfer.setData('text/plain', e.target.getAttribute('data-team'));
+                e.target.style.opacity = '0.4';
+            });
+
+            block.addEventListener('dragend', function (e) {
+                e.target.style.opacity = '';
+            });
         });
-        block.addEventListener('dragend', function(e) {
-            e.target.style.opacity = ''; // Reset the opacity
-        });
-    });
-}
+    }
 
 // Initialize drag events for existing team blocks
 initializeDragEvents();
@@ -181,62 +185,62 @@ teamBlocksContainer.addEventListener('drop', async function(e) {
     }
 });
 
-// Add priority button
-document.getElementById('add-priority-btn').addEventListener('click', async function() {
-    try {
-        const tbody = document.querySelector('tbody');
-        const rowCount = tbody ? parseInt(tbody.getAttribute('data-row-count'), 10) : 0;
-        const newPriorityNum = rowCount + 1;
-        const updatedData = {
-            priorityNum: newPriorityNum
-        };
-        const response = await fetch('/add-priorities', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedData)
-        });
-        if (response.ok) {
-            location.reload();
-        } else {
-            console.error('Failed to add priority.');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An error occurred while adding.',
-            confirmButtonText: 'OK'
-        });
-    }
-});
-
-// Delete last priority button
-document.getElementById('delete-priority-btn').addEventListener('click', async function() {
-    const tbody = document.querySelector('#priority-table tbody');
-    if (tbody.children.length > 0) {
-        const lastRow = tbody.lastElementChild;
-        const priorityId = lastRow.getAttribute('data-id');
-
+// Add priority functionality
+document.getElementById('add-priority-btn').addEventListener('click', async function () {
         try {
-            const response = await fetch(`/delete-priority/${priorityId}`, {
-                method: 'DELETE',
+            const tbody = document.querySelector('tbody');
+            const rowCount = tbody ? parseInt(tbody.getAttribute('data-row-count'), 10) : 0;
+            const newPriorityNum = rowCount + 1;
+            const updatedData = {
+                priorityNum: newPriorityNum,
+            };
+            const response = await fetch('/add-priorities', {
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
             });
-
             if (response.ok) {
                 location.reload();
             } else {
-                console.error('Failed to delete priority.');
+                console.error('Failed to add priority.');
             }
         } catch (error) {
             console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while adding a priority.',
+                confirmButtonText: 'OK',
+            });
         }
-    }
-});
+    });
+
+    // Delete priority functionality
+    document.getElementById('delete-priority-btn').addEventListener('click', async function () {
+        const tbody = document.querySelector('#priority-table tbody');
+        if (tbody.children.length > 0) {
+            const lastRow = tbody.lastElementChild;
+            const priorityId = lastRow.getAttribute('data-id');
+
+            try {
+                const response = await fetch(`/delete-priority/${priorityId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to delete priority.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    });
 });
 </script>
