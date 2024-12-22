@@ -48,9 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function initializeDragEvents() {
         const teamBlocks = document.querySelectorAll('.team-block');
 
-        // Drag events (existing)
         teamBlocks.forEach(block => {
-                        // Enable dragging only when drag starts
             block.addEventListener('dragstart', function (e) {
                 e.dataTransfer.setData('text/plain', e.target.getAttribute('data-team'));
                 e.target.style.opacity = '0.4';
